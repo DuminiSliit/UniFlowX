@@ -93,6 +93,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/login/**").permitAll()
                 .requestMatchers("/oauth2/**").permitAll()
+                .requestMatchers("/api/bookings/**").permitAll() // Temporarily permit all for testing
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )
@@ -110,7 +111,7 @@ public class SecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
+        
         return http.build();
     }
 }
