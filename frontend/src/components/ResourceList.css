@@ -1,0 +1,122 @@
+.resource-list-container {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.module-title {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0.5rem;
+}
+
+.resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.resource-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.resource-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.resource-card.inactive {
+    opacity: 0.7;
+    background-color: #fdfdfd;
+}
+
+.resource-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.resource-header h3 {
+    margin: 0;
+    color: #34495e;
+    font-size: 1.25rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge.out_of_service {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.resource-details p {
+    margin: 0.5rem 0;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.resource-actions {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-edit, .btn-toggle, .btn-delete {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-edit {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.btn-edit:hover {
+    background-color: #dde2e6;
+}
+
+.btn-toggle {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.btn-toggle:hover {
+    background-color: #ffe8a1;
+}
+
+.btn-delete {
+    background-color: #ffebee;
+    color: #c62828;
+    margin-left: auto;
+}
+
+.btn-delete:hover {
+    background-color: #ffcdd2;
+}
