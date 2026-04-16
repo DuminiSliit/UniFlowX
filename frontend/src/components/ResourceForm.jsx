@@ -8,7 +8,8 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
         type: 'Classroom',
         location: '',
         capacity: 30,
-        status: 'ACTIVE'
+        status: 'ACTIVE',
+        imageBase64: ''
     });
     
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +21,8 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
                 type: editingResource.type,
                 location: editingResource.location,
                 capacity: editingResource.capacity,
-                status: editingResource.status
+                status: editingResource.status,
+                imageBase64: editingResource.imageBase64 || ''
             });
         }
     }, [editingResource]);
@@ -31,6 +33,17 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
             ...prev,
             [name]: name === 'capacity' ? parseInt(value) || 0 : value
         }));
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData(prev => ({ ...prev, imageBase64: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -60,7 +73,7 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
             <form onSubmit={handleSubmit} className="resource-form">
                 
                 <div className="form-group">
-                    <label>Resource Name:</label>
+                    <label>Resource Name</label>
                     <input 
                         type="text" 
                         name="name" 
@@ -72,7 +85,7 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
                 </div>
 
                 <div className="form-group">
-                    <label>Resource Type:</label>
+                    <label>Resource Type</label>
                     <select name="type" value={formData.type} onChange={handleChange}>
                         <option value="Classroom">Classroom</option>
                         <option value="Lecture Hall">Lecture Hall</option>
@@ -84,7 +97,7 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
                 </div>
 
                 <div className="form-group">
-                    <label>Location:</label>
+                    <label>Location</label>
                     <input 
                         type="text" 
                         name="location" 
@@ -96,7 +109,7 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
                 </div>
 
                 <div className="form-group">
-                    <label>Capacity (Persons):</label>
+                    <label>Capacity (Persons)</label>
                     <input 
                         type="number" 
                         name="capacity" 
@@ -108,7 +121,7 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
 
                 {editingResource && (
                     <div className="form-group">
-                        <label>Current Status:</label>
+                        <label>Current Status</label>
                         <select name="status" value={formData.status} onChange={handleChange}>
                             <option value="ACTIVE">Active (Available)</option>
                             <option value="OUT_OF_SERVICE">Out of Service</option>
@@ -116,12 +129,28 @@ const ResourceForm = ({ onSuccess, onCancel, editingResource }) => {
                     </div>
                 )}
 
+                <div className="form-group">
+                    <label>Facility Image (Optional)</label>
+                    <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleImageChange}
+                        className="file-input"
+                    />
+                    {formData.imageBase64 && (
+                        <div className="image-preview">
+                            <img src={formData.imageBase64} alt="Facility Preview" />
+                            <button type="button" className="btn-remove-image" onClick={() => setFormData(prev => ({ ...prev, imageBase64: '' }))}>Remove</button>
+                        </div>
+                    )}
+                </div>
+
                 <div className="form-actions">
-                    <button type="submit" disabled={isSubmitting} className="btn-primary">
+                    <button type="submit" disabled={isSubmitting} className="btn-save">
                         {isSubmitting ? 'Saving...' : 'Save Resource'}
                     </button>
                     {onCancel && (
-                        <button type="button" onClick={onCancel} className="btn-secondary">
+                        <button type="button" onClick={onCancel} className="btn-cancel">
                             Cancel
                         </button>
                     )}
