@@ -3,7 +3,6 @@ package com.uniflowx.smartcampus.controller;
 import com.uniflowx.smartcampus.model.Booking;
 import com.uniflowx.smartcampus.model.BookingStatus;
 import com.uniflowx.smartcampus.service.BookingService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +12,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bookings")
-@RequiredArgsConstructor
 public class BookingController {
 
     private final BookingService bookingService;
+
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
 
     @PostMapping
     public ResponseEntity<Booking> createBooking(@RequestBody Booking booking, Authentication authentication) {

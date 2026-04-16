@@ -65,7 +65,7 @@ const BookingList = () => {
                                 <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                     {getStatusBadge(booking.status)}
                                     {booking.rejectionReason && (
-                                        <span style={{ fontSize: '0.75rem', color: var(--danger), display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                        <span style={{ fontSize: '0.75rem', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                                             <Info size={12} /> {booking.rejectionReason}
                                         </span>
                                     )}
