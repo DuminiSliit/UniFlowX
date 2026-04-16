@@ -5,17 +5,28 @@ import ResourceList from './components/ResourceList'
 import ResourceForm from './components/ResourceForm'
 
 function App() {
-  const [view, setView] = useState('resources-list') // 'list', 'form', 'resources-list', 'resource-form'
+  const [view, setView] = useState('resources-list') // 'resources-list', 'resource-form', 'form', 'list'
   const [editingResource, setEditingResource] = useState(null);
+  const [preselectedResourceId, setPreselectedResourceId] = useState(null);
 
   const handleEditResource = (resource) => {
     setEditingResource(resource);
     setView('resource-form');
   };
 
+  const handleBookResource = (resource) => {
+    setPreselectedResourceId(resource.id);
+    setView('form');
+  };
+
   const handleNewResourceClick = () => {
     setEditingResource(null);
     setView('resource-form');
+  };
+
+  const handleNewBookingClick = () => {
+    setPreselectedResourceId(null);
+    setView('form');
   };
 
   return (
@@ -27,25 +38,41 @@ function App() {
             className={view === 'resources-list' || view === 'resource-form' ? 'active' : ''} 
             onClick={() => setView('resources-list')}
           >
-            Facilities & Assets
+            Facilities Catalogue
           </button>
-          {/* <button 
+          <button 
             className={view === 'list' || view === 'form' ? 'active' : ''} 
             onClick={() => setView('list')}
           >
-            Bookings
-          </button> */}
+            Manage Bookings
+          </button>
         </div>
       </nav>
 
       <main className="main-content">
-        {view === 'form' && <BookingForm onSuccess={() => setView('list')} />}
-        {view === 'list' && <BookingList />}
+        {view === 'form' && (
+          <BookingForm 
+            onSuccess={() => setView('list')} 
+            preselectedResourceId={preselectedResourceId}
+          />
+        )}
+        
+        {view === 'list' && (
+          <div>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem'}}>
+              <h2 className="card-title" style={{margin: 0}}>Your Reservations</h2>
+              <button className="btn-primary" onClick={handleNewBookingClick}>+ New Booking</button>
+            </div>
+            <BookingList />
+          </div>
+        )}
         
         {view === 'resources-list' && (
             <div>
-                <button className="btn-primary" onClick={handleNewResourceClick} style={{marginBottom: '20px'}}>+ Add New Facility/Asset</button>
-                <ResourceList onEdit={handleEditResource} />
+                <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: '20px'}}>
+                  <button className="btn-primary" onClick={handleNewResourceClick}>+ Add New Facility/Asset</button>
+                </div>
+                <ResourceList onEdit={handleEditResource} onBook={handleBookResource} />
             </div>
         )}
         

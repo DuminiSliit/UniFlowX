@@ -3,17 +3,19 @@ package com.uniflowx.smartcampus.service;
 import com.uniflowx.smartcampus.model.Booking;
 import com.uniflowx.smartcampus.model.BookingStatus;
 import com.uniflowx.smartcampus.repository.BookingRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+
+    public BookingService(BookingRepository bookingRepository) {
+        this.bookingRepository = bookingRepository;
+    }
 
     @Transactional
     public Booking createBooking(Booking booking) {
