@@ -3,7 +3,7 @@ import { getResources, deleteResource, updateResource } from '../services/api';
 import { Search, Filter, MapPin, Users, Info, Edit, Trash2, Power, Calendar } from 'lucide-react';
 import './ResourceList.css';
 
-const ResourceList = ({ onEdit, onBook }) => {
+const ResourceList = ({ onEdit, onBook, isAdmin }) => {
     const [resources, setResources] = useState([]);
     const [filteredResources, setFilteredResources] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -145,19 +145,24 @@ const ResourceList = ({ onEdit, onBook }) => {
                                 >
                                     Book Now
                                 </button>
-                                <button className="btn-icon" title="Edit" onClick={() => onEdit(res)}>
-                                    <Edit size={18} />
-                                </button>
-                                <button 
-                                    className="btn-icon" 
-                                    title={res.status === 'ACTIVE' ? "Deactivate" : "Activate"}
-                                    onClick={() => toggleStatus(res)}
-                                >
-                                    <Power size={18} />
-                                </button>
-                                <button className="btn-icon delete" title="Delete" onClick={() => handleDelete(res.id)}>
-                                    <Trash2 size={18} />
-                                </button>
+                                
+                                {isAdmin && (
+                                    <>
+                                        <button className="btn-icon" title="Edit" onClick={() => onEdit(res)}>
+                                            <Edit size={18} />
+                                        </button>
+                                        <button 
+                                            className="btn-icon" 
+                                            title={res.status === 'ACTIVE' ? "Deactivate" : "Activate"}
+                                            onClick={() => toggleStatus(res)}
+                                        >
+                                            <Power size={18} />
+                                        </button>
+                                        <button className="btn-icon delete" title="Delete" onClick={() => handleDelete(res.id)}>
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     ))}

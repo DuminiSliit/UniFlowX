@@ -15,10 +15,7 @@
 	<description>Smart Campus Operations Hub</description>
 	<properties>
 		<java.version>17</java.version>
-<<<<<<< HEAD
 		<lombok.version>1.18.36</lombok.version>
-=======
->>>>>>> 7b548ec22c32fa7fea06f51494a25b53ebc987d3
 	</properties>
 	<dependencies>
 		<dependency>
@@ -43,23 +40,29 @@
 		</dependency>
 
 		<dependency>
-<<<<<<< HEAD
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
-=======
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
 		</dependency>
->>>>>>> 7b548ec22c32fa7fea06f51494a25b53ebc987d3
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -75,7 +78,6 @@
 	<build>
 		<plugins>
 			<plugin>
-<<<<<<< HEAD
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.13.0</version>
@@ -87,18 +89,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-=======
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
->>>>>>> 7b548ec22c32fa7fea06f51494a25b53ebc987d3
 			</plugin>
 		</plugins>
 	</build>

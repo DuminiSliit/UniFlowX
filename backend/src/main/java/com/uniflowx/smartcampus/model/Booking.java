@@ -2,6 +2,7 @@ package com.uniflowx.smartcampus.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "bookings")
@@ -11,7 +12,12 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "resource_id", nullable = false)
+    private Resource resource;
+
+    @Transient
+    @JsonProperty("resourceId")
     private Long resourceId;
 
     @Column(nullable = false)
@@ -40,9 +46,9 @@ public class Booking {
     public Booking() {
     }
 
-    public Booking(Long id, Long resourceId, String userId, LocalDateTime startTime, LocalDateTime endTime, String purpose, Integer expectedAttendees, BookingStatus status, String rejectionReason, LocalDateTime createdAt) {
+    public Booking(Long id, Resource resource, String userId, LocalDateTime startTime, LocalDateTime endTime, String purpose, Integer expectedAttendees, BookingStatus status, String rejectionReason, LocalDateTime createdAt) {
         this.id = id;
-        this.resourceId = resourceId;
+        this.resource = resource;
         this.userId = userId;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -55,6 +61,9 @@ public class Booking {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Resource getResource() { return resource; }
+    public void setResource(Resource resource) { this.resource = resource; }
 
     public Long getResourceId() { return resourceId; }
     public void setResourceId(Long resourceId) { this.resourceId = resourceId; }
@@ -88,6 +97,13 @@ public class Booking {
         createdAt = LocalDateTime.now();
         if (status == null) {
             status = BookingStatus.PENDING;
+        }
+    }
+
+    @PostLoad
+    protected void syncResourceId() {
+        if (resource != null) {
+            this.resourceId = resource.getId();
         }
     }
 }

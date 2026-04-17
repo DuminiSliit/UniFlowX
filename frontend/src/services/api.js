@@ -9,6 +9,19 @@ const api = axios.create({
     },
 });
 
+api.interceptors.request.use(
+    (config) => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.accessToken) {
+            config.headers['Authorization'] = 'Bearer ' + user.accessToken;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 export const bookingService = {
     createBooking: (booking) => api.post('/bookings', booking),
     getMyBookings: () => api.get('/bookings/my'),

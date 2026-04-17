@@ -12,16 +12,32 @@ import java.util.List;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final com.uniflowx.smartcampus.repository.ResourceRepository resourceRepository;
 
-    public BookingService(BookingRepository bookingRepository) {
+    public BookingService(BookingRepository bookingRepository, com.uniflowx.smartcampus.repository.ResourceRepository resourceRepository) {
         this.bookingRepository = bookingRepository;
+        this.resourceRepository = resourceRepository;
     }
 
     @Transactional
     public Booking createBooking(Booking booking) {
+        Long rId = booking.getResourceId();
+        if (rId == null && booking.getResource() != null) {
+            rId = booking.getResource().getId();
+        }
+        
+        if (rId == null) {
+            throw new RuntimeException("Resource ID must be provided.");
+        }
+
+        // Fetch resource to ensure it exists and link it
+        com.uniflowx.smartcampus.model.Resource resource = resourceRepository.findById(rId)
+                .orElseThrow(() -> new RuntimeException("Resource not found."));
+        booking.setResource(resource);
+
         // Conflict Check: Check for overlapping approved bookings for the same resource
         List<Booking> overlapping = bookingRepository.findOverlappingBookings(
-                booking.getResourceId(),
+                rId,
                 booking.getStartTime(),
                 booking.getEndTime()
         );
