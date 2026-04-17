@@ -3,6 +3,7 @@ package com.uniflowx.smartcampus.controller;
 import com.uniflowx.smartcampus.model.Resource;
 import com.uniflowx.smartcampus.service.ResourceService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,11 +29,13 @@ public class ResourceController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Resource> createResource(@RequestBody Resource resource) {
         return ResponseEntity.ok(resourceService.createResource(resource));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Resource> updateResource(
             @PathVariable Long id,
             @RequestBody Resource resource) {
@@ -40,6 +43,7 @@ public class ResourceController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteResource(@PathVariable Long id) {
         resourceService.deleteResource(id);
         return ResponseEntity.noContent().build();

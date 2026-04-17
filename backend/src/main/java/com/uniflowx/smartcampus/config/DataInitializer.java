@@ -40,8 +40,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setRoles(roles);
             userRepository.save(admin);
         }
-
-        // Reset password for admin1@uniflowx.com as requested
+// Reset password for admin1@uniflowx.com as requested
         userRepository.findByEmail("admin1@uniflowx.com").ifPresent(user -> {
             user.setPassword(passwordEncoder.encode("admin@123"));
             userRepository.save(user);
