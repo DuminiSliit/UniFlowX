@@ -10,17 +10,29 @@ const OAuth2RedirectHandler = () => {
         const token = params.get('token');
 
         if (token) {
-            // We only have the token from the success handler. 
-            // We can decode basic info from JWT or just fetch user info.
-            // For simplicity, we'll store a minimal user object.
-            const user = {
-                accessToken: token,
-                email: 'google-user@gmail.com', // Placeholder or decode from JWT
-                roles: ['ROLE_STUDENT']
-            };
-            localStorage.setItem('user', JSON.stringify(user));
-            navigate('/');
-            window.location.reload();
+            try {
+                // Decode the JWT payload to get the actual email
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const decodedToken = JSON.parse(jsonPayload);
+                const email = decodedToken.sub; // subject contains the email
+
+                const user = {
+                    accessToken: token,
+                    email: email,
+                    roles: ['ROLE_STUDENT']
+                };
+                localStorage.setItem('user', JSON.stringify(user));
+                navigate('/');
+                window.location.reload();
+            } catch (e) {
+                console.error("Failed to parse token", e);
+                navigate('/login');
+            }
         } else {
             navigate('/login');
         }
