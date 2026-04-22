@@ -37,6 +37,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         Map<String, Object> attributes = oAuth2User.getAttributes();
@@ -60,7 +61,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         String jwt = jwtUtils.generateJwtToken(authenticationToken);
 
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5174/oauth2/redirect")
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/redirect")
                 .queryParam("token", jwt)
                 .build().toUriString();
 
