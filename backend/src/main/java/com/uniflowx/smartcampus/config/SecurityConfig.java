@@ -2,6 +2,8 @@ package com.uniflowx.smartcampus.config;
 
 import com.uniflowx.smartcampus.security.AuthEntryPointJwt;
 import com.uniflowx.smartcampus.security.AuthTokenFilter;
+import com.uniflowx.smartcampus.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.uniflowx.smartcampus.security.oauth2.OAuth2LoginFailureHandler;
 import com.uniflowx.smartcampus.security.oauth2.OAuth2LoginSuccessHandler;
 import com.uniflowx.smartcampus.security.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -31,13 +33,19 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, 
                           AuthEntryPointJwt unauthorizedHandler,
-                          OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+                          OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+                          OAuth2LoginFailureHandler oAuth2LoginFailureHandler,
+                          HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
+        this.oAuth2LoginFailureHandler = oAuth2LoginFailureHandler;
+        this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
     }
 
     @Bean
@@ -84,10 +92,20 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/login/**").permitAll()
+                .requestMatchers("/oauth2/**").permitAll()
+                .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
+                .authorizationEndpoint(authEndpoint -> authEndpoint
+                    .baseUri("/oauth2/authorization")
+                    .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
+                )
+                .redirectionEndpoint(redirectionEndpoint -> redirectionEndpoint
+                    .baseUri("/login/oauth2/code/*")
+                )
                 .successHandler(oAuth2LoginSuccessHandler)
+                .failureHandler(oAuth2LoginFailureHandler)
             );
 
         http.authenticationProvider(authenticationProvider());
