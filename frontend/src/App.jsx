@@ -70,7 +70,7 @@ function Dashboard() {
             className={view === 'list' || view === 'form' ? 'active' : ''}
             onClick={() => setView('list')}
           >
-            {isAdmin ? 'Booking Review Queue' : 'My Bookings'}
+            {isAdmin ? 'Review Queue' : 'My Bookings'}
           </button>
         </div>
 

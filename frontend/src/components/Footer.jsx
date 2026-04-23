@@ -1,11 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import authService from '../services/authService';
 
 const Footer = () => {
-    const currentUser = authService.getCurrentUser();
-    const isAdmin = currentUser?.roles?.includes('ROLE_ADMIN');
-
     return (
         <footer className="footer-container">
             <div className="footer-grid">
@@ -24,9 +20,7 @@ const Footer = () => {
                     <ul>
                         <li><Link to="/">Home</Link></li>
                         <li><Link to="/dashboard">Facilities Catalogue</Link></li>
-                        <li><Link to="/dashboard?view=bookings">
-                            {isAdmin ? 'Booking Review Queue' : 'My Bookings'}
-                        </Link></li>
+                        <li><Link to="/dashboard?view=bookings">My Bookings</Link></li>
                         <li><Link to="#">Report Issue</Link></li>
                     </ul>
                 </div>

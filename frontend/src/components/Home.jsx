@@ -41,9 +41,7 @@ const Home = () => {
                 <div className="nav-menu">
                     <Link to="/" className="nav-menu-link active">Home</Link>
                     <Link to="/dashboard" className="nav-menu-link">Facilities Catalogue</Link>
-                    <Link to="/dashboard?view=bookings" className="nav-menu-link">
-                        {currentUser?.roles?.includes('ROLE_ADMIN') ? 'Booking Review Queue' : 'My Bookings'}
-                    </Link>
+                    <Link to="/dashboard?view=bookings" className="nav-menu-link">My Bookings</Link>
                 </div>
 
                 <div className="home-nav-actions">
