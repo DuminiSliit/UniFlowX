@@ -15,17 +15,17 @@ public class SmartCampusApplication {
         SpringApplication.run(SmartCampusApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner initRoles(RoleRepository roleRepository) {
-        return args -> {
-            for (ERole roleName : ERole.values()) {
-                if (!roleRepository.findByName(roleName).isPresent()) {
-                    Role role = new Role();
-                    role.setName(roleName);
-                    roleRepository.save(role);
-                    System.out.println("Initialized role: " + roleName);
-                }
-            }
-        };
-    }
+    // @Bean
+    // public CommandLineRunner initRoles(RoleRepository roleRepository) {
+    //     return args -> {
+    //         for (ERole roleName : ERole.values()) {
+    //             if (!roleRepository.findByName(roleName).isPresent()) {
+    //                 Role role = new Role();
+    //                 role.setName(roleName);
+    //                 roleRepository.save(role);
+    //                 System.out.println("Initialized role: " + roleName);
+    //             }
+    //         }
+    //     };
+    // }
 }
