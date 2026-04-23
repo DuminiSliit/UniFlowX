@@ -159,6 +159,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+        <Route path="/auth/google/callback" element={<OAuth2RedirectHandler />} />
 
         {/* Protected Dashboard - requires login */}
         <Route element={<ProtectedRoute />}>

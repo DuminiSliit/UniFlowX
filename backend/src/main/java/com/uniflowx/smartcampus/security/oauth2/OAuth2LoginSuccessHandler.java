@@ -70,9 +70,15 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
             String jwt = jwtUtils.generateJwtToken(authenticationToken);
 
+<<<<<<< HEAD
             String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5174/oauth2/redirect")
                     .queryParam("token", jwt)
                     .build().toUriString();
+=======
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/redirect")
+                .queryParam("token", jwt)
+                .build().toUriString();
+>>>>>>> 5c24315 (make google authentication)
 
             clearAuthenticationAttributes(request, response);
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
