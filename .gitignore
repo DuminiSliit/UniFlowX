@@ -152,3 +152,5 @@ bin/
 *.db
 
 backend/src/main/resources/application.properties
+
+frontend/transpiled_app.txt
