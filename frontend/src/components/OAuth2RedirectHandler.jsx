@@ -27,8 +27,14 @@ const OAuth2RedirectHandler = () => {
                     roles: ['ROLE_STUDENT']
                 };
                 localStorage.setItem('user', JSON.stringify(user));
-                navigate('/');
-                window.location.reload();
+                // Redirect admin to dashboard, others to home
+                const isAdmin = user.roles?.includes('ROLE_ADMIN');
+                if (isAdmin) {
+                    navigate('/dashboard');
+                } else {
+                    navigate('/');
+                    window.location.reload();
+                }
             } catch (e) {
                 console.error("Failed to parse token", e);
                 navigate('/login');

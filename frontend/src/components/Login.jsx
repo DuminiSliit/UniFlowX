@@ -18,9 +18,14 @@ const Login = () => {
         setLoading(true);
 
         try {
-            await authService.login(email, password);
-            navigate('/');
-            window.location.reload();
+            const userData = await authService.login(email, password);
+            const isAdmin = userData?.roles?.includes('ROLE_ADMIN');
+            if (isAdmin) {
+                navigate('/dashboard');
+            } else {
+                navigate('/');
+                window.location.reload();
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
         } finally {

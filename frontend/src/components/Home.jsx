@@ -12,7 +12,8 @@ import {
     Search,
     MousePointer2,
     CheckCircle2,
-    ChevronRight
+    ChevronRight,
+    Settings
 } from 'lucide-react';
 import './Home.css';
 import authService from '../services/authService';
@@ -21,6 +22,7 @@ import Footer from './Footer';
 const Home = () => {
     const navigate = useNavigate();
     const [currentUser, setCurrentUser] = useState(null);
+    const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
         setCurrentUser(authService.getCurrentUser());
@@ -40,20 +42,39 @@ const Home = () => {
                 </Link>
                 <div className="nav-menu">
                     <Link to="/" className="nav-menu-link active">Home</Link>
-                    <Link to="/dashboard" className="nav-menu-link">Facilities Catalogue</Link>
-                    <Link to="/dashboard?view=bookings" className="nav-menu-link">My Bookings</Link>
+                    <Link to="/dashboard?view=overview" className="nav-menu-link">Dashboard</Link>
+                    <Link to="/dashboard?view=catalog" className="nav-menu-link">Facilities Catalogue</Link>
+                    <Link to="/dashboard?view=bookings" className="nav-menu-link">
+                        {currentUser?.roles?.includes('ROLE_ADMIN') ? 'Booking Review Queue' : 'My Bookings'}
+                    </Link>
                 </div>
 
                 <div className="home-nav-actions">
                     {currentUser ? (
                         <div className="nav-user">
-                            <div className="user-info">
+                            <div className="user-info" onClick={() => setShowDropdown(!showDropdown)} style={{cursor: 'pointer'}}>
                                 <User size={18} />
                                 <span>{currentUser.email}</span>
                             </div>
-                            <button className="btn-logout" onClick={handleLogout} title="Log Out">
-                                <LogOut size={18} />
-                            </button>
+                            
+                            {showDropdown && (
+                                <div className="user-dropdown">
+                                    <button 
+                                        className="user-dropdown-item" 
+                                        onClick={() => {
+                                            navigate('/dashboard?view=profile');
+                                            setShowDropdown(false);
+                                        }}
+                                    >
+                                        <Settings size={16} />
+                                        Settings
+                                    </button>
+                                    <button className="user-dropdown-item text-danger" onClick={handleLogout}>
+                                        <LogOut size={16} />
+                                        Log Out
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <>
@@ -78,12 +99,36 @@ const Home = () => {
                         or secure email login.
                     </p>
                     <div className="hero-buttons">
-                        <button className="btn-primary lg" onClick={() => navigate('/login')}>
-                            Get Started <LogIn size={20} />
-                        </button>
-                        <button className="btn-secondary lg" onClick={() => navigate('/dashboard')}>
-                            Explore Facilities <ChevronRight size={20} />
-                        </button>
+                        {currentUser ? (
+                            currentUser?.roles?.includes('ROLE_ADMIN') ? (
+                                <>
+                                    <button className="btn-primary lg" onClick={() => navigate('/dashboard')}>
+                                        Admin Dashboard <ChevronRight size={20} />
+                                    </button>
+                                    <button className="btn-secondary lg" onClick={() => navigate('/dashboard?view=bookings')}>
+                                        Booking Review Queue <ChevronRight size={20} />
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button className="btn-primary lg" onClick={() => navigate('/dashboard')}>
+                                        Go to Dashboard <ChevronRight size={20} />
+                                    </button>
+                                    <button className="btn-secondary lg" onClick={() => navigate('/dashboard?view=catalog')}>
+                                        Explore Facilities <ChevronRight size={20} />
+                                    </button>
+                                </>
+                            )
+                        ) : (
+                            <>
+                                <button className="btn-primary lg" onClick={() => navigate('/login')}>
+                                    Get Started <LogIn size={20} />
+                                </button>
+                                <button className="btn-secondary lg" onClick={() => navigate('/dashboard')}>
+                                    Explore Facilities <ChevronRight size={20} />
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className="hero-visual">

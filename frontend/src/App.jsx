@@ -10,16 +10,19 @@ import Home from './components/Home'
 import ProtectedRoute from './components/ProtectedRoute'
 import OAuth2RedirectHandler from './components/OAuth2RedirectHandler'
 import authService from './services/authService'
-import { LogOut, User as UserIcon } from 'lucide-react'
+import UserProfile from './components/UserProfile'
+import DashboardOverview from './components/DashboardOverview'
+import { LogOut, User as UserIcon, Settings } from 'lucide-react'
 import Footer from './components/Footer'
 
 // Dashboard is defined once here
 function Dashboard() {
   const location = useLocation();
-  const [view, setView] = useState('resources-list')
+  const [view, setView] = useState('overview')
   const [editingResource, setEditingResource] = useState(null);
   const [preselectedResourceId, setPreselectedResourceId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     setCurrentUser(authService.getCurrentUser());
@@ -30,8 +33,12 @@ function Dashboard() {
     const params = new URLSearchParams(location.search);
     if (params.get('view') === 'bookings') {
       setView('list');
-    } else if (params.get('view') === 'catalog' || !params.get('view')) {
+    } else if (params.get('view') === 'profile') {
+      setView('profile');
+    } else if (params.get('view') === 'catalog') {
       setView('resources-list');
+    } else if (params.get('view') === 'overview' || !params.get('view')) {
+      setView('overview');
     }
   }, [location.search]);
 
@@ -52,6 +59,11 @@ function Dashboard() {
     window.location.href = '/'; // Hard redirect to Landing
   };
 
+  // If on overview, render full-page dashboard (has its own sidebar/topbar)
+  if (view === 'overview') {
+    return <DashboardOverview setView={setView} isAdmin={isAdmin} />;
+  }
+
   return (
     <div className="app-container">
       <nav className="navbar">
@@ -60,6 +72,12 @@ function Dashboard() {
         </Link>
         <div className="nav-links">
           <Link to="/" className="nav-btn">Home</Link>
+          <button
+            className={view === 'overview' ? 'active' : ''}
+            onClick={() => setView('overview')}
+          >
+            Dashboard
+          </button>
           <button
             className={view === 'resources-list' || view === 'resource-form' ? 'active' : ''}
             onClick={() => setView('resources-list')}
@@ -70,26 +88,46 @@ function Dashboard() {
             className={view === 'list' || view === 'form' ? 'active' : ''}
             onClick={() => setView('list')}
           >
-            {isAdmin ? 'Review Queue' : 'My Bookings'}
+            {isAdmin ? 'Booking Review Queue' : 'My Bookings'}
           </button>
         </div>
 
         <div className="nav-actions">
           {currentUser && (
             <div className="nav-user">
-              <div className="user-info">
+              <div className="user-info" onClick={() => setShowDropdown(!showDropdown)} style={{cursor: 'pointer'}}>
                 <UserIcon size={18} />
                 <span>{currentUser.email}</span>
               </div>
-              <button className="btn-logout" onClick={handleLogout} title="Log Out">
-                <LogOut size={18} />
-              </button>
+              
+              {showDropdown && (
+                <div className="user-dropdown">
+                  <button 
+                    className="user-dropdown-item" 
+                    onClick={() => {
+                      setView('profile');
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Settings size={16} />
+                    Settings
+                  </button>
+                  <button className="user-dropdown-item text-danger" onClick={handleLogout}>
+                    <LogOut size={16} />
+                    Log Out
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
       </nav>
 
       <main className="main-content">
+        {view === 'overview' && (
+          <DashboardOverview setView={setView} isAdmin={isAdmin} />
+        )}
+
         {view === 'form' && (
           <BookingForm
             onSuccess={() => setView('list')}
@@ -101,7 +139,7 @@ function Dashboard() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <h2 className="card-title" style={{ margin: 0 }}>
-                {isAdmin ? 'Pending Approval Queue' : 'Your Reservations'}
+                {isAdmin ? 'Booking Review Queue' : 'Your Reservations'}
               </h2>
               {!isAdmin && (
                 <button className="btn-primary" onClick={() => setView('form')}>+ New Booking</button>
@@ -128,6 +166,10 @@ function Dashboard() {
             onCancel={() => setView('resources-list')}
             editingResource={editingResource}
           />
+        )}
+
+        {view === 'profile' && (
+          <UserProfile />
         )}
       </main>
 

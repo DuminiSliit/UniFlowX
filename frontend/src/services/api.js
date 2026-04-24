@@ -31,6 +31,14 @@ export const bookingService = {
     cancelBooking: (id) => api.put(`/bookings/${id}/cancel`),
 };
 
+// User API
+export const userService = {
+    getProfile: () => api.get('/users/profile'),
+    updateProfile: (data) => api.put('/users/profile', data),
+    updatePassword: (data) => api.put('/users/password', data),
+    getAllUsers: () => api.get('/users'),
+};
+
 // Resources API
 export const getResources = async () => {
     const response = await api.get('/resources');
