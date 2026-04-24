@@ -10,6 +10,8 @@ const OAuth2RedirectHandler = () => {
         const token = params.get('token');
 
         if (token) {
+<<<<<<< HEAD
+<<<<<<< HEAD
             try {
                 // Decode JWT to get the user data (specifically the email/subject)
                 const payload = JSON.parse(atob(token.split('.')[1]));
@@ -27,6 +29,24 @@ const OAuth2RedirectHandler = () => {
                 console.error("Error decoding token:", error);
                 navigate('/login');
             }
+=======
+=======
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
+            // We only have the token from the success handler. 
+            // We can decode basic info from JWT or just fetch user info.
+            // For simplicity, we'll store a minimal user object.
+            const user = {
+                accessToken: token,
+                email: 'google-user@gmail.com', // Placeholder or decode from JWT
+                roles: ['ROLE_STUDENT']
+            };
+            localStorage.setItem('user', JSON.stringify(user));
+            navigate('/');
+            window.location.reload();
+<<<<<<< HEAD
+>>>>>>> 206b7e2 (Enhance booking details, standardize footer, and polish landing page visuals)
+=======
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
         } else {
             navigate('/login');
         }

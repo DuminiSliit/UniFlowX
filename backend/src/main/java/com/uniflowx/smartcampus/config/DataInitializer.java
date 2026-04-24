@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
 
-@Component
+// @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
@@ -40,11 +40,13 @@ public class DataInitializer implements CommandLineRunner {
             admin.setRoles(roles);
             userRepository.save(admin);
         }
-
-        // Reset password for admin1@uniflowx.com as requested
+<<<<<<< HEAD
+// Reset password for admin1@uniflowx.com as requested
         userRepository.findByEmail("admin1@uniflowx.com").ifPresent(user -> {
             user.setPassword(passwordEncoder.encode("admin@123"));
             userRepository.save(user);
         });
+=======
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
     }
 }
