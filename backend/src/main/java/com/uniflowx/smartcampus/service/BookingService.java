@@ -63,6 +63,24 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found."));
 
+        if (status == BookingStatus.APPROVED) {
+            // Re-verify conflicts before final approval
+            List<Booking> overlapping = bookingRepository.findOverlappingBookings(
+                    booking.getResource().getId(),
+                    booking.getStartTime(),
+                    booking.getEndTime()
+            );
+
+            // Filter out the current booking if it was somehow already approved (shouldn't happen here)
+            overlapping = overlapping.stream()
+                    .filter(b -> !b.getId().equals(id))
+                    .collect(java.util.stream.Collectors.toList());
+
+            if (!overlapping.isEmpty()) {
+                throw new RuntimeException("Conflict detected: This slot has already been booked and approved for another user.");
+            }
+        }
+
         booking.setStatus(status);
         if (status == BookingStatus.REJECTED) {
             booking.setRejectionReason(rejectionReason);

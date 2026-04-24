@@ -26,6 +26,12 @@ public class User {
     @Size(max = 120)
     private String password;
 
+    @Size(max = 100)
+    private String fullName;
+
+    @Size(max = 20)
+    private String phone;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
                joinColumns = @JoinColumn(name = "user_id"),
@@ -62,6 +68,22 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public Set<Role> getRoles() {

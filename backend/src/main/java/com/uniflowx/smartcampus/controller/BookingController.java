@@ -3,11 +3,13 @@ package com.uniflowx.smartcampus.controller;
 import com.uniflowx.smartcampus.model.Booking;
 import com.uniflowx.smartcampus.model.BookingStatus;
 import com.uniflowx.smartcampus.service.BookingService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,10 +24,16 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<Booking> createBooking(@RequestBody Booking booking, Authentication authentication) {
+    public ResponseEntity<?> createBooking(@RequestBody Booking booking, Authentication authentication) {
         String userEmail = authentication.getName();
         booking.setUserId(userEmail);
-        return ResponseEntity.ok(bookingService.createBooking(booking));
+        try {
+            return ResponseEntity.ok(bookingService.createBooking(booking));
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
     }
 
     @GetMapping("/my")
@@ -44,12 +52,18 @@ public class BookingController {
 
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Booking> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @PathVariable Long id,
             @RequestBody Map<String, Object> payload) {
-        BookingStatus status = BookingStatus.valueOf((String) payload.get("status"));
-        String reason = (String) payload.get("rejectionReason");
-        return ResponseEntity.ok(bookingService.updateBookingStatus(id, status, reason));
+        try {
+            BookingStatus status = BookingStatus.valueOf((String) payload.get("status"));
+            String reason = (String) payload.get("rejectionReason");
+            return ResponseEntity.ok(bookingService.updateBookingStatus(id, status, reason));
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        }
     }
 
     @PutMapping("/{id}/cancel")
