@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
+// @Service
 public class BookingService {
 
     private final BookingRepository bookingRepository;

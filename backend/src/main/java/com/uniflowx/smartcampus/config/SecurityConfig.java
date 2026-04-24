@@ -23,9 +23,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-@Configuration
-@EnableWebSecurity
-@EnableMethodSecurity
+// @Configuration
+// @EnableWebSecurity
+// @EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
@@ -91,7 +91,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl("http://localhost:5173", true)
+                .defaultSuccessUrl("http://localhost:5173/home", true)
                 .successHandler(oAuth2LoginSuccessHandler)
             );
 

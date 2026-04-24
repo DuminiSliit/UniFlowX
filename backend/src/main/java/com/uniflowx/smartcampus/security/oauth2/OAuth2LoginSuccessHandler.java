@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-@Component
+// @Component
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtUtils jwtUtils;
