@@ -7,6 +7,10 @@ import ResourceForm from './components/ResourceForm'
 import Login from './components/Login'
 import Register from './components/Register'
 import Home from './components/Home'
+<<<<<<< HEAD
+=======
+import SmartCampusHome from './components/SmartCampusHome'
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 import ProtectedRoute from './components/ProtectedRoute'
 import OAuth2RedirectHandler from './components/OAuth2RedirectHandler'
 import authService from './services/authService'
@@ -154,6 +158,11 @@ function App() {
         {/* LANDING PAGE - Always visible at / and /home */}
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
+<<<<<<< HEAD
+=======
+        <Route path="/smart-campus" element={<SmartCampusHome />} />
+        <Route path="/campus-home" element={<SmartCampusHome />} />
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />

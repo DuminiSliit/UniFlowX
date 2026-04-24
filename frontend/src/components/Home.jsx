@@ -42,12 +42,16 @@ const Home = () => {
                     <Link to="/" className="nav-menu-link active">Home</Link>
                     <Link to="/dashboard" className="nav-menu-link">Facilities Catalogue</Link>
 <<<<<<< HEAD
+<<<<<<< HEAD
                     <Link to="/dashboard?view=bookings" className="nav-menu-link">
                         {currentUser?.roles?.includes('ROLE_ADMIN') ? 'Booking Review Queue' : 'My Bookings'}
                     </Link>
 =======
                     <Link to="/dashboard?view=bookings" className="nav-menu-link">My Bookings</Link>
 >>>>>>> 206b7e2 (Enhance booking details, standardize footer, and polish landing page visuals)
+=======
+                    <Link to="/dashboard?view=bookings" className="nav-menu-link">My Bookings</Link>
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
                 </div>
 
                 <div className="home-nav-actions">

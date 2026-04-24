@@ -8,8 +8,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+<<<<<<< HEAD
 @RestController
 @RequestMapping("/api/resources")
+=======
+// @RestController
+// @RequestMapping("/api/resources")
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 public class ResourceController {
 
     private final ResourceService resourceService;

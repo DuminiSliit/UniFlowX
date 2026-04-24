@@ -7,7 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+<<<<<<< HEAD
 @Service
+=======
+// @Service
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 public class ResourceService {
 
     private final ResourceRepository resourceRepository;

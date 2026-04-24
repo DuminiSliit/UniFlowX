@@ -50,7 +50,11 @@
 			<scope>runtime</scope>
 		</dependency>
 
+<<<<<<< HEAD
 <dependency>
+=======
+		<dependency>
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
 			<version>0.11.5</version>
@@ -67,6 +71,10 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
+<<<<<<< HEAD
+=======
+
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

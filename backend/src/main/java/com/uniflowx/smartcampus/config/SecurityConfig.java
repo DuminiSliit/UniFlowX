@@ -3,10 +3,13 @@ package com.uniflowx.smartcampus.config;
 import com.uniflowx.smartcampus.security.AuthEntryPointJwt;
 import com.uniflowx.smartcampus.security.AuthTokenFilter;
 <<<<<<< HEAD
+<<<<<<< HEAD
 import com.uniflowx.smartcampus.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.uniflowx.smartcampus.security.oauth2.OAuth2LoginFailureHandler;
 =======
 >>>>>>> 206b7e2 (Enhance booking details, standardize footer, and polish landing page visuals)
+=======
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 import com.uniflowx.smartcampus.security.oauth2.OAuth2LoginSuccessHandler;
 import com.uniflowx.smartcampus.security.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -23,10 +26,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+<<<<<<< HEAD
 =======
 =======
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -47,11 +54,20 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+=======
+
+import java.util.Arrays;
+
+// @Configuration
+// @EnableWebSecurity
+// @EnableMethodSecurity
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+<<<<<<< HEAD
 <<<<<<< HEAD
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
@@ -147,6 +163,8 @@ public class SecurityConfig {
         
         return http.build();
 =======
+=======
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, 
                           AuthEntryPointJwt unauthorizedHandler,
@@ -177,7 +195,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+<<<<<<< HEAD
 >>>>>>> 206b7e2 (Enhance booking details, standardize footer, and polish landing page visuals)
+=======
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
     }
 
     @Bean
@@ -208,7 +229,11 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
+<<<<<<< HEAD
                 .defaultSuccessUrl("http://localhost:5173", true)
+=======
+                .defaultSuccessUrl("http://localhost:5173/home", true)
+>>>>>>> ab89632e0e431b93b556bb1e88b872dc3901228f
                 .successHandler(oAuth2LoginSuccessHandler)
             );
 
