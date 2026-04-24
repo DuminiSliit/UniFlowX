@@ -1,12 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import './SmartCampusHome.css';
+import authService from '../services/authService';
 
 const SmartCampusHome = () => {
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
   const [userStatus, setUserStatus] = useState({
     authenticated: true,
     loginMethod: 'Google OAuth2',
     loginTime: new Date().toLocaleString()
   });
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
+    if (user) {
+      setUserStatus(prev => ({
+        ...prev,
+        authenticated: true,
+        loginTime: new Date().toLocaleString()
+      }));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+  };
 
   const [campusStats, setCampusStats] = useState({
     activeCourses: 12,
@@ -63,10 +85,23 @@ const SmartCampusHome = () => {
       {/* Header */}
       <header className="home-header">
         <div className="header-content">
-          <h1 className="campus-title">
-            🏫 Welcome to UniFlowX Smart Campus 🏫
-          </h1>
-          <p className="campus-subtitle">Empowering Education Through Technology</p>
+          <div className="header-left">
+            <h1 className="campus-title">
+              🏫 Welcome to UniFlowX Smart Campus 🏫
+            </h1>
+            <p className="campus-subtitle">Empowering Education Through Technology</p>
+          </div>
+          <div className="header-right">
+            {currentUser && (
+              <div className="user-section">
+                <span className="user-email">👤 {currentUser.email}</span>
+                <button className="logout-btn" onClick={handleLogout} title="Logout">
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

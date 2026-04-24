@@ -23,7 +23,9 @@ const Home = () => {
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        setCurrentUser(authService.getCurrentUser());
+        const user = authService.getCurrentUser();
+        console.log("Home component - Current user:", user);
+        setCurrentUser(user);
     }, []);
 
     const handleLogout = () => {
@@ -45,14 +47,15 @@ const Home = () => {
                 </div>
 
                 <div className="home-nav-actions">
-                    {currentUser ? (
+                    {(currentUser || authService.getCurrentUser()) ? (
                         <div className="nav-user">
                             <div className="user-info">
                                 <User size={18} />
-                                <span>{currentUser.email}</span>
+                                <span>{currentUser?.email || authService.getCurrentUser()?.email}</span>
                             </div>
                             <button className="btn-logout" onClick={handleLogout} title="Log Out">
                                 <LogOut size={18} />
+                                Logout
                             </button>
                         </div>
                     ) : (
