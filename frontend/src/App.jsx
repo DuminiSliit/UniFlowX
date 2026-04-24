@@ -13,6 +13,9 @@ import OAuth2RedirectHandler from './components/OAuth2RedirectHandler'
 import authService from './services/authService'
 import { LogOut, User as UserIcon } from 'lucide-react'
 import Footer from './components/Footer'
+import TicketsPage from './pages/TicketsPage'
+import CreateTicketPage from './pages/CreateTicketPage'
+import TicketDetailPage from './pages/TicketDetailPage'
 
 // Dashboard is defined once here
 function Dashboard() {
@@ -73,6 +76,9 @@ function Dashboard() {
           >
             {isAdmin ? 'Review Queue' : 'My Bookings'}
           </button>
+          <Link to="/tickets" className="nav-btn">
+            Maintenance Tickets
+          </Link>
         </div>
 
         <div className="nav-actions">
@@ -167,6 +173,9 @@ function App() {
         {/* Protected Dashboard - requires login */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/tickets" element={<TicketsPage />} />
+          <Route path="/tickets/create" element={<CreateTicketPage />} />
+          <Route path="/tickets/:id" element={<TicketDetailPage />} />
         </Route>
 
         {/* Redirect unknown routes back to landing */}
