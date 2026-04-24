@@ -150,3 +150,5 @@ bin/
 
 # Database
 *.db
+
+backend/src/main/resources/application.properties
