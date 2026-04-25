@@ -421,66 +421,6 @@
 .step h4 { margin-bottom: 0.75rem; }
 .step p { color: var(--text-muted); font-size: 0.9rem; }
 
-/* Navigation User Section Styles */
-.home-nav-actions {
-    justify-self: end;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.nav-user {
-    display: flex !important;
-    align-items: center !important;
-    gap: 1rem !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-.user-info {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    color: var(--text-main) !important;
-    font-weight: 500 !important;
-    font-size: 0.9rem !important;
-    padding: 0.5rem 0 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-.btn-logout {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 0.5rem !important;
-    padding: 0.5rem 1rem !important;
-    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: var(--radius-md) !important;
-    cursor: pointer !important;
-    font-size: 0.9rem !important;
-    font-weight: 500 !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2) !important;
-    min-width: 80px !important;
-    z-index: 1000 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-}
-
-.btn-logout:hover {
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.btn-logout:active {
-    transform: translateY(0);
-}
-
 /* Footer Styles moved to index.css */
 
 @media (max-width: 900px) {

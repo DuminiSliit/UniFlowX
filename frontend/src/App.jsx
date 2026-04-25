@@ -7,15 +7,11 @@ import ResourceForm from './components/ResourceForm'
 import Login from './components/Login'
 import Register from './components/Register'
 import Home from './components/Home'
-import SmartCampusHome from './components/SmartCampusHome'
 import ProtectedRoute from './components/ProtectedRoute'
 import OAuth2RedirectHandler from './components/OAuth2RedirectHandler'
 import authService from './services/authService'
 import { LogOut, User as UserIcon } from 'lucide-react'
 import Footer from './components/Footer'
-import TicketsPage from './pages/TicketsPage'
-import CreateTicketPage from './pages/CreateTicketPage'
-import TicketDetailPage from './pages/TicketDetailPage'
 
 // Dashboard is defined once here
 function Dashboard() {
@@ -76,9 +72,6 @@ function Dashboard() {
           >
             {isAdmin ? 'Review Queue' : 'My Bookings'}
           </button>
-          <Link to="/tickets" className="nav-btn">
-            Maintenance Tickets
-          </Link>
         </div>
 
         <div className="nav-actions">
@@ -161,21 +154,15 @@ function App() {
         {/* LANDING PAGE - Always visible at / and /home */}
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/smart-campus" element={<SmartCampusHome />} />
-        <Route path="/campus-home" element={<SmartCampusHome />} />
 
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
-        <Route path="/auth/google/callback" element={<OAuth2RedirectHandler />} />
 
         {/* Protected Dashboard - requires login */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/tickets" element={<TicketsPage />} />
-          <Route path="/tickets/create" element={<CreateTicketPage />} />
-          <Route path="/tickets/:id" element={<TicketDetailPage />} />
         </Route>
 
         {/* Redirect unknown routes back to landing */}
