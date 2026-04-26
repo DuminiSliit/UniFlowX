@@ -17,7 +17,7 @@ import java.util.Date;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${uniflowx.app.jwtSecret:======================UniFlowXSmartCampusSecretKeyByAntigravity======================}")
+    @Value("${uniflowx.app.jwtSecret:5ut+N1zhWJOHnmK7trWo7OnpTX3jQtHtbYXiQiZTXEo=}")
     private String jwtSecret;
 
     @Value("${uniflowx.app.jwtExpirationMs:86400000}")
@@ -46,7 +46,7 @@ public class JwtUtils {
 
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
+            Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken);
             return true;
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());

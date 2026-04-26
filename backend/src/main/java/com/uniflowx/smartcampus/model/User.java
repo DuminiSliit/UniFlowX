@@ -71,4 +71,8 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+    public String getUsername() {
+        return email;
+    }
 }
