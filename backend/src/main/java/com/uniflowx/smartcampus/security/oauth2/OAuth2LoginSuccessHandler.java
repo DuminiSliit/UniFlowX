@@ -61,7 +61,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         String jwt = jwtUtils.generateJwtToken(authenticationToken);
 
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/redirect")
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5174/oauth2/redirect")
                 .queryParam("token", jwt)
                 .build().toUriString();
 
