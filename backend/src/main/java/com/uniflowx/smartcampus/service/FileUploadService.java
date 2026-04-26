@@ -18,8 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-// @Service
-// @Transactional
+@Service
+@Transactional
 public class FileUploadService {
 
     private final TicketAttachmentRepository attachmentRepository;

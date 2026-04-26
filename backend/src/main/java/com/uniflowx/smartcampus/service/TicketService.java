@@ -14,8 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// @Service
-// @Transactional
+@Service
+@Transactional
 public class TicketService {
 
     private final TicketRepository ticketRepository;
@@ -128,6 +128,43 @@ public class TicketService {
         return convertToResponse(updatedTicket);
     }
 
+    public TicketResponse updateTicket(Long id, UpdateTicketRequest request, User currentUser) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id: " + id));
+
+        if (!canUpdateTicket(ticket, currentUser)) {
+            throw new UnauthorizedException("You don't have permission to update this ticket");
+        }
+
+        // Update ticket fields
+        if (request.getTitle() != null && !request.getTitle().trim().isEmpty()) {
+            ticket.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null && !request.getDescription().trim().isEmpty()) {
+            ticket.setDescription(request.getDescription());
+        }
+        if (request.getCategory() != null) {
+            ticket.setCategory(request.getCategory());
+        }
+        if (request.getPriority() != null) {
+            ticket.setPriority(request.getPriority());
+        }
+        if (request.getLocation() != null && !request.getLocation().trim().isEmpty()) {
+            ticket.setLocation(request.getLocation());
+        }
+        if (request.getPreferredContact() != null) {
+            ticket.setPreferredContact(request.getPreferredContact());
+        }
+        if (request.getResourceId() != null) {
+            Resource resource = resourceRepository.findById(request.getResourceId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + request.getResourceId()));
+            ticket.setResource(resource);
+        }
+
+        Ticket updatedTicket = ticketRepository.save(ticket);
+        return convertToResponse(updatedTicket);
+    }
+
     public void deleteTicket(Long id, User currentUser) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id: " + id));
@@ -155,6 +192,9 @@ public class TicketService {
     }
 
     private boolean hasAdminOrTechnicianRole(User user) {
+        if (user == null || user.getRoles() == null) {
+            return false;
+        }
         return user.getRoles().stream()
                 .anyMatch(role -> role.getName() == ERole.ROLE_ADMIN || role.getName() == ERole.ROLE_TECHNICIAN);
     }
