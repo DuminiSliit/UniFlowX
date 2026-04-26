@@ -21,37 +21,47 @@ import java.nio.file.Paths;
 @RequestMapping("/api")
 public class FileUploadController {
 
-    // Temporarily disabled to fix startup issues
-    // private final FileUploadService fileUploadService;
+    private final FileUploadService fileUploadService;
 
-    public FileUploadController() {
-        // this.fileUploadService = fileUploadService;
+    public FileUploadController(FileUploadService fileUploadService) {
+        this.fileUploadService = fileUploadService;
     }
 
     @PostMapping("/tickets/{ticketId}/attachments")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<String> uploadAttachment(
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN', 'STUDENT')")
+    public ResponseEntity<?> uploadAttachment(
             @PathVariable Long ticketId,
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.ok("File upload temporarily disabled");
+        try {
+            TicketAttachment attachment = fileUploadService.uploadAttachment(ticketId, file);
+            return ResponseEntity.ok(attachment);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error uploading file: " + e.getMessage()));
+        }
     }
 
     @DeleteMapping("/attachments/{attachmentId}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN', 'STUDENT')")
     public ResponseEntity<MessageResponse> deleteAttachment(
             @PathVariable Long attachmentId,
             @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        MessageResponse response = new MessageResponse("File deletion temporarily disabled");
-        return ResponseEntity.ok(response);
+        try {
+            fileUploadService.deleteAttachment(attachmentId);
+            return ResponseEntity.ok(new MessageResponse("Attachment deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error deleting attachment: " + e.getMessage()));
+        }
     }
 
     @GetMapping("/attachments/{attachmentId}/download")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN', 'STUDENT')")
     public ResponseEntity<Resource> downloadAttachment(@PathVariable Long attachmentId) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.notFound().build();
+        try {
+            // For now, return a placeholder - you can implement actual file download later
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
