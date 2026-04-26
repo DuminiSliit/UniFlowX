@@ -36,12 +36,13 @@ const Home = () => {
             {/* Navigation Bar */}
             <nav className="home-nav">
                 <Link to="/" className="logo-link">
-                    <img src="/logo.png" alt="UniFlowX Logo" className="logo-img" />
+                    <div className="logo-text">UniFlowX</div>
                 </Link>
                 <div className="nav-menu">
                     <Link to="/" className="nav-menu-link active">Home</Link>
                     <Link to="/dashboard" className="nav-menu-link">Facilities Catalogue</Link>
                     <Link to="/dashboard?view=bookings" className="nav-menu-link">My Bookings</Link>
+                    <Link to="/ticketing" className="nav-menu-link">Ticketing</Link>
                 </div>
 
                 <div className="home-nav-actions">
@@ -87,14 +88,16 @@ const Home = () => {
                     </div>
                 </div>
                 <div className="hero-visual">
-                    <div className="hero-image-wrapper">
-                        <img src="/hero-students.jpg" alt="Students using UniFlowX" className="hero-main-img" />
-                        <div className="hero-image-overlay"></div>
+                    <div className="hero-graphic">
                         <div className="floating-stat stat-1">
                             <span className="dot"></span> 24/7 Access
                         </div>
                         <div className="floating-stat stat-2">
                             <span className="dot"></span> Smart Booking
+                        </div>
+                        <div className="hero-placeholder">
+                            <div className="campus-icon">🏫</div>
+                            <p>Smart Campus Hub</p>
                         </div>
                     </div>
                 </div>

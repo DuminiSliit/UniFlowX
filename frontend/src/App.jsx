@@ -4,6 +4,10 @@ import BookingForm from './components/BookingForm'
 import BookingList from './components/BookingList'
 import ResourceList from './components/ResourceList'
 import ResourceForm from './components/ResourceForm'
+import TicketsPage from './pages/TicketsPage'
+import CreateTicketPage from './pages/CreateTicketPage'
+import TicketDetailPage from './pages/TicketDetailPage'
+import TicketingPage from './pages/TicketingPage'
 import Login from './components/Login'
 import Register from './components/Register'
 import Home from './components/Home'
@@ -163,6 +167,10 @@ function App() {
         {/* Protected Dashboard - requires login */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/tickets" element={<TicketsPage />} />
+          <Route path="/tickets/create" element={<CreateTicketPage />} />
+          <Route path="/tickets/:id" element={<TicketDetailPage />} />
+          <Route path="/ticketing" element={<TicketingPage />} />
         </Route>
 
         {/* Redirect unknown routes back to landing */}
