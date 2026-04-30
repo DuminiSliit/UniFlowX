@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import com.uniflowx.smartcampus.model.ERole;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,20 @@ public class UserController {
             u.put("roles", user.getRoles().stream()
                 .map(r -> r.getName().name())
                 .collect(Collectors.toList()));
+            return u;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/technicians")
+    public ResponseEntity<?> getTechnicians() {
+        List<User> techs = userRepository.findByRolesName(ERole.ROLE_TECHNICIAN);
+        List<Map<String, Object>> result = techs.stream().map(user -> {
+            Map<String, Object> u = new HashMap<>();
+            u.put("id", user.getId());
+            u.put("email", user.getEmail());
+            u.put("fullName", user.getFullName() != null ? user.getFullName() : "");
+            u.put("username", user.getEmail().split("@")[0]);
             return u;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(result);

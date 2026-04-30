@@ -71,4 +71,19 @@ public class BookingController {
         String userEmail = authentication.getName();
         return ResponseEntity.ok(bookingService.cancelBooking(id, userEmail));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBooking(
+            @PathVariable Long id,
+            @RequestBody Booking bookingUpdate,
+            Authentication authentication) {
+        String userEmail = authentication.getName();
+        try {
+            return ResponseEntity.ok(bookingService.updateBooking(id, bookingUpdate, userEmail));
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
 }

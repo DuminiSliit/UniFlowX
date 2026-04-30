@@ -30,6 +30,9 @@ public class CreateTicketRequest {
     @Size(max = 100, message = "Preferred contact must not exceed 100 characters")
     private String preferredContact;
 
+    private Integer estimatedTime;
+    private Long assignedToId;
+
     // Getters and Setters
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -51,4 +54,10 @@ public class CreateTicketRequest {
 
     public String getPreferredContact() { return preferredContact; }
     public void setPreferredContact(String preferredContact) { this.preferredContact = preferredContact; }
+
+    public Integer getEstimatedTime() { return estimatedTime; }
+    public void setEstimatedTime(Integer estimatedTime) { this.estimatedTime = estimatedTime; }
+
+    public Long getAssignedToId() { return assignedToId; }
+    public void setAssignedToId(Long assignedToId) { this.assignedToId = assignedToId; }
 }

@@ -14,21 +14,24 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// @Service
-// @Transactional
+@Service
+@Transactional
 public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final ResourceRepository resourceRepository;
     private final TicketAttachmentRepository attachmentRepository;
+    private final TicketCommentRepository commentRepository;
 
     public TicketService(TicketRepository ticketRepository, UserRepository userRepository, 
-                        ResourceRepository resourceRepository, TicketAttachmentRepository attachmentRepository) {
+                        ResourceRepository resourceRepository, TicketAttachmentRepository attachmentRepository,
+                        TicketCommentRepository commentRepository) {
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
         this.resourceRepository = resourceRepository;
         this.attachmentRepository = attachmentRepository;
+        this.commentRepository = commentRepository;
     }
 
     public TicketResponse createTicket(CreateTicketRequest request, User currentUser) {
@@ -48,6 +51,14 @@ public class TicketService {
         ticket.setLocation(request.getLocation());
         ticket.setCreatedBy(currentUser);
         ticket.setPreferredContact(request.getPreferredContact());
+        ticket.setEstimatedTime(request.getEstimatedTime());
+
+        if (request.getAssignedToId() != null) {
+            User assignedTo = userRepository.findById(request.getAssignedToId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getAssignedToId()));
+            ticket.setAssignedTo(assignedTo);
+            ticket.setStatus(TicketStatus.IN_PROGRESS);
+        }
 
         Ticket savedTicket = ticketRepository.save(ticket);
         return convertToResponse(savedTicket);
@@ -55,7 +66,12 @@ public class TicketService {
 
     @Transactional(readOnly = true)
     public Page<TicketResponse> getAllTickets(Pageable pageable, User currentUser) {
-        if (hasAdminOrTechnicianRole(currentUser)) {
+        System.out.println("Fetching tickets for user: " + currentUser.getEmail());
+        System.out.println("User roles size: " + currentUser.getRoles().size());
+        boolean isAdmin = hasAdminOrTechnicianRole(currentUser);
+        System.out.println("Is Admin or Tech: " + isAdmin);
+        
+        if (isAdmin) {
             return ticketRepository.findAll(pageable).map(this::convertToResponse);
         } else {
             return ticketRepository.findByCreatedBy(currentUser, pageable).map(this::convertToResponse);
@@ -63,21 +79,16 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TicketResponse> getFilteredTickets(TicketStatus status, TicketCategory category, 
+    public Page<TicketResponse> getFilteredTickets(String keyword, TicketStatus status, TicketCategory category, 
                                                   TicketPriority priority, Long assignedToId, 
                                                   Pageable pageable, User currentUser) {
         
-        User assignedTo = null;
-        if (assignedToId != null) {
-            assignedTo = userRepository.findById(assignedToId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + assignedToId));
-        }
-
+        Long createdByUserId = null;
         if (!hasAdminOrTechnicianRole(currentUser)) {
-            return ticketRepository.findByCreatedBy(currentUser, pageable).map(this::convertToResponse);
+            createdByUserId = currentUser.getId();
         }
 
-        return ticketRepository.findByFilters(status, category, priority, assignedTo, pageable)
+        return ticketRepository.findByFilters(keyword, status, category, priority, assignedToId, createdByUserId, pageable)
                 .map(this::convertToResponse);
     }
 
@@ -104,6 +115,10 @@ public class TicketService {
         validateStatusTransition(ticket.getStatus(), request.getStatus());
 
         ticket.setStatus(request.getStatus());
+        if (request.getReason() != null && !request.getReason().isEmpty()) {
+            ticket.setResolutionNotes(request.getReason());
+        }
+        
         Ticket updatedTicket = ticketRepository.save(ticket);
         return convertToResponse(updatedTicket);
     }
@@ -143,6 +158,109 @@ public class TicketService {
         ticketRepository.delete(ticket);
     }
 
+    // Comment methods
+    public TicketResponse.TicketCommentResponse addComment(Long ticketId, CommentRequest request, User currentUser) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id: " + ticketId));
+
+        if (!canAccessTicket(ticket, currentUser)) {
+            throw new UnauthorizedException("You don't have permission to comment on this ticket");
+        }
+
+        TicketComment comment = new TicketComment();
+        comment.setTicket(ticket);
+        comment.setUser(currentUser);
+        comment.setContent(request.getContent());
+
+        TicketComment savedComment = commentRepository.save(comment);
+        return convertCommentToResponse(savedComment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TicketResponse.TicketCommentResponse> getTicketComments(Long ticketId, User currentUser) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id: " + ticketId));
+
+        if (!canAccessTicket(ticket, currentUser)) {
+            throw new UnauthorizedException("You don't have permission to access this ticket");
+        }
+
+        return commentRepository.findByTicket(ticket).stream()
+                .map(this::convertCommentToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public TicketResponse.TicketCommentResponse updateComment(Long commentId, CommentRequest request, User currentUser) {
+        TicketComment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment not found with id: " + commentId));
+
+        if (!comment.getUser().getId().equals(currentUser.getId()) && !hasAdminRole(currentUser)) {
+            throw new UnauthorizedException("You don't have permission to update this comment");
+        }
+
+        comment.setContent(request.getContent());
+        TicketComment updatedComment = commentRepository.save(comment);
+        return convertCommentToResponse(updatedComment);
+    }
+
+    public void deleteComment(Long commentId, User currentUser) {
+        TicketComment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment not found with id: " + commentId));
+
+        if (!comment.getUser().getId().equals(currentUser.getId()) && !hasAdminRole(currentUser)) {
+            throw new UnauthorizedException("You don't have permission to delete this comment");
+        }
+
+        commentRepository.delete(comment);
+    }
+
+    // Attachment methods
+    public TicketResponse.TicketAttachmentResponse uploadAttachment(Long ticketId, String fileName, String contentType, byte[] data, User currentUser) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with id: " + ticketId));
+
+        if (!canAccessTicket(ticket, currentUser)) {
+            throw new UnauthorizedException("You don't have permission to add attachments to this ticket");
+        }
+
+        if (ticket.getAttachments().size() >= 3) {
+            throw new ValidationException("Maximum 3 attachments allowed per ticket");
+        }
+
+        TicketAttachment attachment = new TicketAttachment();
+        attachment.setTicket(ticket);
+        attachment.setFileName(fileName);
+        attachment.setContentType(contentType);
+        attachment.setData(data);
+        attachment.setFileSize((long) data.length);
+
+        TicketAttachment savedAttachment = attachmentRepository.save(attachment);
+        return convertAttachmentToResponse(savedAttachment);
+    }
+
+    public void deleteAttachment(Long attachmentId, User currentUser) {
+        TicketAttachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attachment not found with id: " + attachmentId));
+
+        if (!canUpdateTicket(attachment.getTicket(), currentUser)) {
+            throw new UnauthorizedException("You don't have permission to delete this attachment");
+        }
+
+        attachmentRepository.delete(attachment);
+    }
+
+    @Transactional(readOnly = true)
+    public TicketAttachment getAttachmentData(Long attachmentId, User currentUser) {
+        TicketAttachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attachment not found with id: " + attachmentId));
+
+        if (!canAccessTicket(attachment.getTicket(), currentUser)) {
+            throw new UnauthorizedException("You don't have permission to access this attachment");
+        }
+
+        return attachment;
+    }
+
     private boolean canAccessTicket(Ticket ticket, User currentUser) {
         return hasAdminOrTechnicianRole(currentUser) || 
                ticket.getCreatedBy().getId().equals(currentUser.getId()) ||
@@ -156,12 +274,12 @@ public class TicketService {
 
     private boolean hasAdminOrTechnicianRole(User user) {
         return user.getRoles().stream()
-                .anyMatch(role -> role.getName() == ERole.ROLE_ADMIN || role.getName() == ERole.ROLE_TECHNICIAN);
+                .anyMatch(role -> role.getName().name().equals("ROLE_ADMIN") || role.getName().name().equals("ROLE_TECHNICIAN"));
     }
 
     private boolean hasAdminRole(User user) {
         return user.getRoles().stream()
-                .anyMatch(role -> role.getName() == ERole.ROLE_ADMIN);
+                .anyMatch(role -> role.getName().name().equals("ROLE_ADMIN"));
     }
 
     private void validateStatusTransition(TicketStatus currentStatus, TicketStatus newStatus) {
@@ -204,6 +322,8 @@ public class TicketService {
         response.setPreferredContact(ticket.getPreferredContact());
         response.setCreatedAt(ticket.getCreatedAt());
         response.setUpdatedAt(ticket.getUpdatedAt());
+        response.setEstimatedTime(ticket.getEstimatedTime());
+        response.setResolutionNotes(ticket.getResolutionNotes());
 
         if (ticket.getResource() != null) {
             TicketResponse.ResourceResponse resourceResponse = new TicketResponse.ResourceResponse();

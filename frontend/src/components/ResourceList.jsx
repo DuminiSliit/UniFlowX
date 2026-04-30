@@ -10,13 +10,17 @@ const ResourceList = ({ onEdit, onBook, isAdmin }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [typeFilter, setTypeFilter] = useState('All');
 
+    const [error, setError] = useState(null);
+
     const fetchResources = async () => {
         try {
+            setError(null);
             const data = await getResources();
             setResources(data);
             setFilteredResources(data);
-        } catch (error) {
-            console.error("Error fetching resources", error);
+        } catch (err) {
+            console.error("Error fetching resources", err);
+            setError(err.response?.data?.message || err.message || "Failed to fetch resources. Please try logging out and logging back in.");
         } finally {
             setLoading(false);
         }
@@ -27,9 +31,15 @@ const ResourceList = ({ onEdit, onBook, isAdmin }) => {
     }, []);
 
     useEffect(() => {
+        if (!Array.isArray(resources)) {
+            setFilteredResources([]);
+            return;
+        }
         const filtered = resources.filter(res => {
-            const matchesSearch = res.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                res.location.toLowerCase().includes(searchTerm.toLowerCase());
+            const name = res.name || '';
+            const location = res.location || '';
+            const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                location.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesType = typeFilter === 'All' || res.type === typeFilter;
             return matchesSearch && matchesType;
         });
@@ -61,6 +71,13 @@ const ResourceList = ({ onEdit, onBook, isAdmin }) => {
         <div className="empty-state">
             <div className="loading-spinner"></div>
             <p>Loading the campus catalogue...</p>
+        </div>
+    );
+
+    if (error) return (
+        <div className="empty-state" style={{ color: 'red' }}>
+            <h2>Error Loading Resources</h2>
+            <p>{error}</p>
         </div>
     );
 

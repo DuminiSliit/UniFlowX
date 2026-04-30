@@ -121,6 +121,16 @@ const Register = () => {
                                 />
                                 Admin
                             </label>
+                            <label className={`role-option ${role === 'technician' ? 'active' : ''}`}>
+                                <input 
+                                    type="radio" 
+                                    name="role" 
+                                    value="technician" 
+                                    checked={role === 'technician'} 
+                                    onChange={() => setRole('technician')}
+                                />
+                                Technician
+                            </label>
                         </div>
                     </div>
 

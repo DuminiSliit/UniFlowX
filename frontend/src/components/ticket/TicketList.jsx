@@ -1,23 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import ticketService from '../../services/ticketService';
+import { Search, Filter, Calendar, User, MapPin, Eye, Edit3, Trash2, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
+import './TicketList.css';
 
-const TicketList = () => {
+const TicketList = ({ setView, setSelectedTicketId, initialFilters }) => {
+  const currentUser = JSON.parse(localStorage.getItem('user'));
+  const isTechnician = currentUser?.roles?.includes('ROLE_TECHNICIAN');
+  const isAdmin = currentUser?.roles?.includes('ROLE_ADMIN');
+
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [filters, setFilters] = useState({
-    status: '',
-    category: '',
-    priority: '',
-    keyword: ''
+    status: initialFilters?.status || '',
+    category: initialFilters?.category || '',
+    priority: initialFilters?.priority || '',
+    keyword: initialFilters?.keyword || '',
+    assignedToId: initialFilters?.assignedToId || ''
   });
-
-  const ticketStatuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED', 'REJECTED'];
-  const ticketCategories = ['EQUIPMENT', 'FACILITY', 'NETWORK', 'SOFTWARE', 'OTHER'];
-  const ticketPriorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
   useEffect(() => {
     fetchTickets();
@@ -26,16 +28,22 @@ const TicketList = () => {
   const fetchTickets = async () => {
     try {
       setLoading(true);
-      const hasFilters = Object.values(filters).some(value => value !== '');
+      
+      // Only send non-empty filters to the backend
+      const activeFilters = Object.fromEntries(
+        Object.entries(filters).filter(([_, value]) => value !== '')
+      );
+      
+      const hasFilters = Object.keys(activeFilters).length > 0;
+      
       const response = hasFilters 
-        ? await ticketService.searchTickets(filters, currentPage)
+        ? await ticketService.searchTickets(activeFilters, currentPage)
         : await ticketService.getAllTickets(currentPage);
       
       setTickets(response.content || []);
       setTotalPages(response.totalPages || 0);
     } catch (err) {
       setError('Failed to fetch tickets');
-      console.error('Error fetching tickets:', err);
     } finally {
       setLoading(false);
     }
@@ -46,216 +54,156 @@ const TicketList = () => {
     setCurrentPage(0);
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'OPEN': return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS': return 'bg-yellow-100 text-yellow-800';
-      case 'RESOLVED': return 'bg-green-100 text-green-800';
-      case 'CLOSED': return 'bg-gray-100 text-gray-800';
-      case 'REJECTED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'LOW': return 'bg-gray-100 text-gray-800';
-      case 'MEDIUM': return 'bg-blue-100 text-blue-800';
-      case 'HIGH': return 'bg-orange-100 text-orange-800';
-      case 'URGENT': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  if (loading && tickets.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Maintenance Tickets</h1>
-        <Link
-          to="/tickets/create"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Create New Ticket
-        </Link>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Filters</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+    <div className="ticket-list-wrapper">
+      {/* Filters Section */}
+      <div className="tl-filter-card">
+        <div className="tl-filter-header">
+          <div className="tl-filter-icon">
+            <Filter className="w-5 h-5" />
+          </div>
+          <h2>Filter Tickets</h2>
+        </div>
+        
+        <div className="tl-filter-grid">
+          <div className="tl-search-input-group">
+            <Search className="tl-search-icon w-4 h-4" />
             <input
               type="text"
-              placeholder="Search tickets..."
+              placeholder="Search by ticket title..."
+              className="tl-input"
               value={filters.keyword}
               onChange={(e) => handleFilterChange('keyword', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <div className="tl-select-group">
             <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Statuses</option>
-              {ticketStatuses.map(status => (
-                <option key={status} value={status}>{status.replace('_', ' ')}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <select
-              value={filters.category}
-              onChange={(e) => handleFilterChange('category', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Categories</option>
-              {ticketCategories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-            <select
+              className="tl-select"
               value={filters.priority}
               onChange={(e) => handleFilterChange('priority', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Priorities</option>
-              {ticketPriorities.map(priority => (
-                <option key={priority} value={priority}>{priority}</option>
-              ))}
+              <option value="LOW">Low Priority</option>
+              <option value="MEDIUM">Medium Priority</option>
+              <option value="HIGH">High Priority</option>
+              <option value="URGENT">Urgent Priority</option>
             </select>
           </div>
+          
+          {isTechnician && (
+            <div className="tl-toggle-group">
+              <label className="tl-toggle">
+                <input 
+                  type="checkbox"
+                  checked={filters.assignedToId === currentUser.id}
+                  onChange={(e) => handleFilterChange('assignedToId', e.target.checked ? currentUser.id : '')}
+                />
+                <span className="tl-toggle-label">Assigned to me</span>
+              </label>
+            </div>
+          )}
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+      {/* Tickets List */}
+      {loading ? (
+        <div className="tl-loading">
+          <div className="tl-spinner" />
+        </div>
+      ) : tickets.length === 0 ? (
+        <div className="tl-empty-state">
+          <div className="tl-empty-icon">
+            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3>No Maintenance Tickets Yet</h3>
+          <p>When you submit maintenance tickets, they will appear here. Track your facility issues in real-time.</p>
+        </div>
+      ) : (
+        <div className="tl-grid">
+          {tickets.map((ticket) => (
+            <div 
+              key={ticket.id} 
+              className={`tl-card priority-${ticket.priority?.toLowerCase() || 'medium'}`}
+            >
+              <div className="tl-card-header">
+                <div className="tl-badge-group">
+                  <span className="tl-badge tl-badge-priority">{ticket.priority || 'N/A'}</span>
+                  <span className="tl-badge tl-badge-category">{ticket.category || 'N/A'}</span>
+                </div>
+                <div className={`tl-status-badge status-${ticket.status?.toLowerCase() || 'open'}`}>
+                  {ticket.status?.replace('_', ' ') || 'OPEN'}
+                </div>
+              </div>
+
+              <h3 
+                className="tl-card-title"
+                onClick={() => { setSelectedTicketId(ticket.id); setView('ticket-detail'); }}
+              >
+                {ticket.title}
+              </h3>
+              
+              <p className="tl-card-desc">{ticket.description}</p>
+
+              <div className="tl-card-meta">
+                <div className="tl-meta-item">
+                  <MapPin className="w-3 h-3" />
+                  <span>{ticket.location || 'No Location'}</span>
+                </div>
+                <div className="tl-meta-item">
+                  <User className="w-3 h-3" />
+                  <span>{ticket.createdBy?.username || 'System'}</span>
+                </div>
+                <div className="tl-meta-item">
+                  <Calendar className="w-3 h-3" />
+                  <span>{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'N/A'}</span>
+                </div>
+                <div className="tl-meta-item">
+                  <Clock className="w-3 h-3" />
+                  <span>{ticket.estimatedTime ? `${ticket.estimatedTime}h` : 'No Est.'}</span>
+                </div>
+              </div>
+
+              <div className="tl-card-actions">
+                <button 
+                  className="tl-btn-view"
+                  onClick={() => { setSelectedTicketId(ticket.id); setView('ticket-detail'); }}
+                >
+                  <Eye className="w-4 h-4" /> View Details
+                </button>
+                <button className="tl-btn-icon edit">
+                  <Edit3 className="w-4 h-4" />
+                </button>
+                <button className="tl-btn-icon delete">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Tickets List */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        {tickets.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No tickets found</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Title
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Priority
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created By
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {tickets.map((ticket) => (
-                  <tr key={ticket.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      #{ticket.id}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        <Link to={`/tickets/${ticket.id}`} className="hover:text-blue-600">
-                          {ticket.title}
-                        </Link>
-                      </div>
-                      <div className="text-sm text-gray-500 truncate max-w-xs">
-                        {ticket.description}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {ticket.category}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(ticket.priority)}`}>
-                        {ticket.priority}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(ticket.status)}`}>
-                        {ticket.status.replace('_', ' ')}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {ticket.createdBy?.username || 'Unknown'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(ticket.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <Link
-                        to={`/tickets/${ticket.id}`}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-6 space-x-2">
+        <div className="tl-pagination">
           <button
+            className="tl-page-btn"
             onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
             disabled={currentPage === 0}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Previous
+            <ArrowLeft className="w-4 h-4" />
           </button>
-          <span className="px-4 py-2 text-gray-700">
-            Page {currentPage + 1} of {totalPages}
-          </span>
+          <div className="tl-page-info">
+            {currentPage + 1} / {totalPages}
+          </div>
           <button
+            className="tl-page-btn"
             onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
             disabled={currentPage === totalPages - 1}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Next
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       )}

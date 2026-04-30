@@ -4,7 +4,10 @@ import com.uniflowx.smartcampus.dto.*;
 import com.uniflowx.smartcampus.model.TicketCategory;
 import com.uniflowx.smartcampus.model.TicketPriority;
 import com.uniflowx.smartcampus.model.TicketStatus;
+import com.uniflowx.smartcampus.model.TicketAttachment;
 import com.uniflowx.smartcampus.model.User;
+import com.uniflowx.smartcampus.repository.UserRepository;
+import com.uniflowx.smartcampus.security.services.UserDetailsImpl;
 import com.uniflowx.smartcampus.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -15,46 +18,59 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tickets")
 public class TicketController {
 
-    // Temporarily disabled to fix startup issues
-    // private final TicketService ticketService;
+    private final TicketService ticketService;
 
-    public TicketController() {
-        // this.ticketService = ticketService;
+    private final UserRepository userRepository;
+
+    public TicketController(TicketService ticketService, UserRepository userRepository) {
+        this.ticketService = ticketService;
+        this.userRepository = userRepository;
+    }
+
+    private User getCurrentUser(UserDetailsImpl userDetails) {
+        return userRepository.findById(userDetails.getId()).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<String> createTicket(
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<TicketResponse> createTicket(
             @Valid @RequestBody CreateTicketRequest request,
-            @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.ok("Ticket creation temporarily disabled");
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(ticketService.createTicket(request, currentUser));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<String> getAllTickets(
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<Page<TicketResponse>> getAllTickets(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String priority,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String search,
-            @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.ok("Ticket listing temporarily disabled");
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? 
+                    Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        return ResponseEntity.ok(ticketService.getAllTickets(pageable, currentUser));
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<String> searchTickets(
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<Page<TicketResponse>> searchTickets(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) TicketStatus status,
             @RequestParam(required = false) TicketCategory category,
@@ -64,73 +80,127 @@ public class TicketController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir,
-            @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.ok("Ticket search temporarily disabled");
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? 
+                    Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        return ResponseEntity.ok(ticketService.getFilteredTickets(keyword, status, category, priority, assignedToId, pageable, currentUser));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<String> getTicketById(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.ok("Ticket details temporarily disabled");
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<TicketResponse> getTicketById(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(ticketService.getTicketById(id, currentUser));
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<String> updateTicketStatus(
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<TicketResponse> updateTicketStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateTicketStatusRequest request,
-            @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.ok("Ticket status update temporarily disabled");
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(ticketService.updateTicketStatus(id, request, currentUser));
     }
 
     @PutMapping("/{id}/assign")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<String> assignTicket(
+    public ResponseEntity<TicketResponse> assignTicket(
             @PathVariable Long id,
             @Valid @RequestBody AssignTicketRequest request,
-            @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.ok("Ticket assignment temporarily disabled");
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(ticketService.assignTicket(id, request, currentUser));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<MessageResponse> deleteTicket(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        MessageResponse response = new MessageResponse("Ticket deletion temporarily disabled");
-        return ResponseEntity.ok(response);
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<MessageResponse> deleteTicket(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        ticketService.deleteTicket(id, currentUser);
+        return ResponseEntity.ok(new MessageResponse("Ticket deleted successfully"));
     }
 
-    @GetMapping("/stats")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
-    public ResponseEntity<String> getTicketStats(@AuthenticationPrincipal User currentUser) {
-        // Temporarily disabled - return placeholder response
-        return ResponseEntity.ok("Ticket stats temporarily disabled");
+    // Comment Endpoints
+    @PostMapping("/{id}/comments")
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<TicketResponse.TicketCommentResponse> addComment(
+            @PathVariable Long id,
+            @Valid @RequestBody CommentRequest request,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(ticketService.addComment(id, request, currentUser));
     }
 
-    public static class TicketStatsResponse {
-        private long totalTickets;
-        private long openTickets;
-        private long inProgressTickets;
-        private long resolvedTickets;
-        private long closedTickets;
-        private long rejectedTickets;
+    @GetMapping("/{id}/comments")
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<List<TicketResponse.TicketCommentResponse>> getTicketComments(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(ticketService.getTicketComments(id, currentUser));
+    }
 
-        // Getters and setters
-        public long getTotalTickets() { return totalTickets; }
-        public void setTotalTickets(long totalTickets) { this.totalTickets = totalTickets; }
-        public long getOpenTickets() { return openTickets; }
-        public void setOpenTickets(long openTickets) { this.openTickets = openTickets; }
-        public long getInProgressTickets() { return inProgressTickets; }
-        public void setInProgressTickets(long inProgressTickets) { this.inProgressTickets = inProgressTickets; }
-        public long getResolvedTickets() { return resolvedTickets; }
-        public void setResolvedTickets(long resolvedTickets) { this.resolvedTickets = resolvedTickets; }
-        public long getClosedTickets() { return closedTickets; }
-        public void setClosedTickets(long closedTickets) { this.closedTickets = closedTickets; }
-        public long getRejectedTickets() { return rejectedTickets; }
-        public void setRejectedTickets(long rejectedTickets) { this.rejectedTickets = rejectedTickets; }
+    @PutMapping("/comments/{commentId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<TicketResponse.TicketCommentResponse> updateComment(
+            @PathVariable Long commentId,
+            @Valid @RequestBody CommentRequest request,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(ticketService.updateComment(commentId, request, currentUser));
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<MessageResponse> deleteComment(
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        ticketService.deleteComment(commentId, currentUser);
+        return ResponseEntity.ok(new MessageResponse("Comment deleted successfully"));
+    }
+
+    // Attachment Endpoints
+    @PostMapping("/{id}/attachments")
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<TicketResponse.TicketAttachmentResponse> uploadAttachment(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+        User currentUser = getCurrentUser(userDetails);
+        return ResponseEntity.ok(ticketService.uploadAttachment(
+                id, 
+                file.getOriginalFilename(), 
+                file.getContentType(), 
+                file.getBytes(), 
+                currentUser));
+    }
+
+    @DeleteMapping("/attachments/{attachmentId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<MessageResponse> deleteAttachment(
+            @PathVariable Long attachmentId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        ticketService.deleteAttachment(attachmentId, currentUser);
+        return ResponseEntity.ok(new MessageResponse("Attachment deleted successfully"));
+    }
+
+    @GetMapping("/attachments/{attachmentId}/download")
+    @PreAuthorize("hasAnyRole('STUDENT', 'STAFF', 'ADMIN', 'TECHNICIAN')")
+    public ResponseEntity<byte[]> downloadAttachment(
+            @PathVariable Long attachmentId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User currentUser = getCurrentUser(userDetails);
+        TicketAttachment attachment = ticketService.getAttachmentData(attachmentId, currentUser);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getFileName() + "\"")
+                .contentType(MediaType.parseMediaType(attachment.getContentType()))
+                .body(attachment.getData());
     }
 }

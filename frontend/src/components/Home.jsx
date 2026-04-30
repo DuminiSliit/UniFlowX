@@ -47,6 +47,7 @@ const Home = () => {
                     <Link to="/dashboard?view=bookings" className="nav-menu-link">
                         {currentUser?.roles?.includes('ROLE_ADMIN') ? 'Booking Review Queue' : 'My Bookings'}
                     </Link>
+                    <Link to="/dashboard?view=tickets" className="nav-menu-link">Incident Tickets</Link>
                 </div>
 
                 <div className="home-nav-actions">

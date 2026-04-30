@@ -17,7 +17,7 @@ import java.util.Date;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${uniflowx.app.jwtSecret:======================UniFlowXSmartCampusSecretKeyByAntigravity======================}")
+    @Value("${uniflowx.app.jwtSecret:Ym9sZGVyLWNhbXB1cy1zZWNyZXQta2V5LTI1Ni1iaXQtaGFzaC1mb3ItdW5pZmxvd3g=}")
     private String jwtSecret;
 
     @Value("${uniflowx.app.jwtExpirationMs:86400000}")

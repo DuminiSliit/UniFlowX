@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom'
 import BookingForm from './components/BookingForm'
 import BookingList from './components/BookingList'
 import ResourceList from './components/ResourceList'
@@ -14,30 +14,93 @@ import UserProfile from './components/UserProfile'
 import DashboardOverview from './components/DashboardOverview'
 import { LogOut, User as UserIcon, Settings } from 'lucide-react'
 import Footer from './components/Footer'
+import TicketsPage from './pages/TicketsPage'
+import CreateTicketPage from './pages/CreateTicketPage'
+import TicketDetailPage from './pages/TicketDetailPage'
 
 // Dashboard is defined once here
 function Dashboard() {
+  const navigate = useNavigate();
   const location = useLocation();
-  const [view, setView] = useState('overview')
+  const [view, setView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view');
+    const urlViewMap = {
+      'bookings': 'list',
+      'profile': 'profile',
+      'catalog': 'resources-list',
+      'tickets': 'tickets',
+      'create-ticket': 'create-ticket',
+      'ticket-detail': 'ticket-detail',
+      'overview': 'overview'
+    };
+    return urlViewMap[viewParam] || 'overview';
+  })
   const [editingResource, setEditingResource] = useState(null);
   const [preselectedResourceId, setPreselectedResourceId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedTicketId, setSelectedTicketId] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+  });
+  const [initialTicketFilters, setInitialTicketFilters] = useState({});
 
   useEffect(() => {
     setCurrentUser(authService.getCurrentUser());
   }, []);
 
-  // Sync view state when query parameters change
+  // Update URL when view changes
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    if (params.get('view') === 'bookings') {
+    const currentView = params.get('view');
+    
+    // Map internal view names to URL params if different
+    const urlViewMap = {
+      'list': 'bookings',
+      'profile': 'profile',
+      'resources-list': 'catalog',
+      'tickets': 'tickets',
+      'create-ticket': 'create-ticket',
+      'overview': 'overview',
+      'ticket-detail': 'ticket-detail'
+    };
+
+    const targetUrlView = urlViewMap[view] || view;
+    let url = `/dashboard?view=${targetUrlView}`;
+    
+    if (view === 'ticket-detail' && selectedTicketId) {
+      url += `&id=${selectedTicketId}`;
+    }
+
+    if (location.search !== `?${url.split('?')[1]}`) {
+      navigate(url, { replace: true });
+    }
+  }, [view, selectedTicketId, navigate, location.search]);
+
+  // Sync view state when query parameters change (for initial load/direct links)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const viewParam = params.get('view');
+    const idParam = params.get('id');
+
+    if (idParam) {
+      setSelectedTicketId(idParam);
+    }
+
+    if (viewParam === 'bookings') {
       setView('list');
-    } else if (params.get('view') === 'profile') {
+    } else if (viewParam === 'profile') {
       setView('profile');
-    } else if (params.get('view') === 'catalog') {
+    } else if (viewParam === 'catalog') {
       setView('resources-list');
-    } else if (params.get('view') === 'overview' || !params.get('view')) {
+    } else if (viewParam === 'tickets') {
+      setView('tickets');
+    } else if (viewParam === 'create-ticket') {
+      setView('create-ticket');
+    } else if (viewParam === 'ticket-detail') {
+      setView('ticket-detail');
+    } else if (viewParam === 'overview' || !viewParam) {
       setView('overview');
     }
   }, [location.search]);
@@ -61,7 +124,13 @@ function Dashboard() {
 
   // If on overview, render full-page dashboard (has its own sidebar/topbar)
   if (view === 'overview') {
-    return <DashboardOverview setView={setView} isAdmin={isAdmin} />;
+    return (
+      <DashboardOverview 
+        setView={setView} 
+        isAdmin={isAdmin} 
+        setInitialTicketFilters={setInitialTicketFilters} 
+      />
+    );
   }
 
   return (
@@ -89,6 +158,12 @@ function Dashboard() {
             onClick={() => setView('list')}
           >
             {isAdmin ? 'Booking Review Queue' : 'My Bookings'}
+          </button>
+          <button
+            className={view === 'tickets' || view === 'create-ticket' || view === 'ticket-detail' ? 'active' : ''}
+            onClick={() => { setSelectedTicketId(null); setView('tickets'); }}
+          >
+            Incident Tickets
           </button>
         </div>
 
@@ -123,9 +198,13 @@ function Dashboard() {
         </div>
       </nav>
 
-      <main className="main-content">
+      <main className={`main-content ${(view === 'tickets' || view === 'create-ticket' || view === 'ticket-detail') ? 'full-width-view' : ''}`}>
         {view === 'overview' && (
-          <DashboardOverview setView={setView} isAdmin={isAdmin} />
+          <DashboardOverview 
+            setView={setView} 
+            isAdmin={isAdmin} 
+            setInitialTicketFilters={setInitialTicketFilters} 
+          />
         )}
 
         {view === 'form' && (
@@ -170,6 +249,26 @@ function Dashboard() {
 
         {view === 'profile' && (
           <UserProfile />
+        )}
+
+        {view === 'tickets' && (
+          <TicketsPage 
+            setView={setView} 
+            setSelectedTicketId={setSelectedTicketId} 
+            initialFilters={initialTicketFilters}
+          />
+        )}
+
+        {view === 'create-ticket' && (
+          <CreateTicketPage onSuccess={() => setView('tickets')} onCancel={() => setView('tickets')} />
+        )}
+
+        {view === 'ticket-detail' && (
+          <TicketDetailPage 
+            id={selectedTicketId} 
+            setView={setView} 
+            onBack={() => { setView('tickets'); setSelectedTicketId(null); }} 
+          />
         )}
       </main>
 

@@ -12,8 +12,9 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const user = JSON.parse(localStorage.getItem('user'));
-        if (user && user.accessToken) {
-            config.headers['Authorization'] = 'Bearer ' + user.accessToken;
+        const token = user?.accessToken || user?.token;
+        if (user && token) {
+            config.headers['Authorization'] = 'Bearer ' + token;
         }
         return config;
     },
@@ -29,6 +30,7 @@ export const bookingService = {
     updateStatus: (id, status, rejectionReason) => 
         api.put(`/bookings/${id}/status`, { status, rejectionReason }),
     cancelBooking: (id) => api.put(`/bookings/${id}/cancel`),
+    updateBooking: (id, booking) => api.put(`/bookings/${id}`, booking),
 };
 
 // User API
@@ -37,6 +39,7 @@ export const userService = {
     updateProfile: (data) => api.put('/users/profile', data),
     updatePassword: (data) => api.put('/users/password', data),
     getAllUsers: () => api.get('/users'),
+    getTechnicians: () => api.get('/users/technicians'),
 };
 
 // Resources API

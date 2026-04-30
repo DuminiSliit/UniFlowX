@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { bookingService, getResources } from '../services/api';
 import { Calendar, Clock, Users, FileText, Send, Landmark } from 'lucide-react';
 
-const BookingForm = ({ onSuccess, preselectedResourceId }) => {
+const BookingForm = ({ onSuccess, preselectedResourceId, initialData, onCancel }) => {
     const [resources, setResources] = useState([]);
     const [formData, setFormData] = useState({
-        resourceId: preselectedResourceId || '',
-        startTime: '',
-        endTime: '',
-        purpose: '',
-        expectedAttendees: ''
+        resourceId: initialData?.resourceId || initialData?.resource?.id || preselectedResourceId || '',
+        startTime: initialData?.startTime ? new Date(initialData.startTime).toISOString().slice(0, 16) : '',
+        endTime: initialData?.endTime ? new Date(initialData.endTime).toISOString().slice(0, 16) : '',
+        purpose: initialData?.purpose || '',
+        expectedAttendees: initialData?.attendees || initialData?.expectedAttendees || ''
     });
     const [loading, setLoading] = useState(false);
     const [fetchingResources, setFetchingResources] = useState(true);
@@ -21,7 +21,8 @@ const BookingForm = ({ onSuccess, preselectedResourceId }) => {
                 const data = await getResources();
                 // Filter for ACTIVE resources only
                 setResources(data.filter(r => r.status === 'ACTIVE'));
-                if (!preselectedResourceId && data.length > 0) {
+                
+                if (!initialData && !preselectedResourceId && data.length > 0) {
                     const activeResources = data.filter(r => r.status === 'ACTIVE');
                     if (activeResources.length > 0) {
                         setFormData(prev => ({ ...prev, resourceId: activeResources[0].id }));
@@ -34,19 +35,27 @@ const BookingForm = ({ onSuccess, preselectedResourceId }) => {
             }
         };
         fetchResources();
-    }, [preselectedResourceId]);
+    }, [preselectedResourceId, initialData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
+        const payload = {
+            ...formData,
+            resourceId: parseInt(formData.resourceId),
+            attendees: parseInt(formData.expectedAttendees) || 0
+        };
+
         try {
-            await bookingService.createBooking({
-                ...formData,
-                resourceId: parseInt(formData.resourceId)
-            });
-            alert('Booking request submitted successfully!');
+            if (initialData?.id) {
+                await bookingService.updateBooking(initialData.id, payload);
+                alert('Booking updated successfully!');
+            } else {
+                await bookingService.createBooking(payload);
+                alert('Booking request submitted successfully!');
+            }
             onSuccess();
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to submit booking request.');
@@ -62,24 +71,26 @@ const BookingForm = ({ onSuccess, preselectedResourceId }) => {
     if (fetchingResources) return <div className="empty-state">Loading booking options...</div>;
 
     return (
-        <div className="card" style={{maxWidth: '800px', margin: '0 auto'}}>
-            <h2 className="card-title">Reserve a Campus Facility</h2>
+        <div className="card" style={{maxWidth: '800px', margin: '0 auto', padding: '1.5rem'}}>
+            <h2 className="card-title" style={{marginBottom: '1rem', fontSize: '1.25rem'}}>{initialData ? 'Update Booking Request' : 'Reserve a Campus Facility'}</h2>
             {error && (
                 <div style={{ 
                     padding: '1rem', 
                     background: '#fef2f2', 
-                    color: 'var(--danger)', 
-                    borderRadius: 'var(--radius-md)',
+                    color: '#b91c1c', 
+                    borderRadius: '0.75rem',
                     marginBottom: '1.5rem',
-                    border: '1px solid #fee2e2',
-                    fontSize: '0.9rem'
+                    border: '1px solid #fecaca',
+                    fontSize: '0.9rem',
+                    fontWeight: 500
                 }}>
                     <strong>Update Failed:</strong> {error}
                 </div>
             )}
             
             <form onSubmit={handleSubmit} className="resource-form">
-                <div className="form-group">
+                {/* ... fields stay same ... */}
+                <div className="form-group" style={{marginBottom: '0.8rem'}}>
                     <label><Landmark size={16} style={{verticalAlign: 'middle', marginRight: '6px'}} /> Select Facility / Resource</label>
                     <select 
                         name="resourceId" 
@@ -96,8 +107,8 @@ const BookingForm = ({ onSuccess, preselectedResourceId }) => {
                     </select>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                    <div className="form-group">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.8rem' }}>
+                    <div className="form-group" style={{marginBottom: 0}}>
                         <label><Calendar size={16} style={{verticalAlign: 'middle', marginRight: '6px'}} /> Start Time</label>
                         <input 
                             type="datetime-local" 
@@ -107,7 +118,7 @@ const BookingForm = ({ onSuccess, preselectedResourceId }) => {
                             required 
                         />
                     </div>
-                    <div className="form-group">
+                    <div className="form-group" style={{marginBottom: 0}}>
                         <label><Clock size={16} style={{verticalAlign: 'middle', marginRight: '6px'}} /> End Time</label>
                         <input 
                             type="datetime-local" 
@@ -119,7 +130,7 @@ const BookingForm = ({ onSuccess, preselectedResourceId }) => {
                     </div>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group" style={{marginBottom: '0.8rem'}}>
                     <label><Users size={16} style={{verticalAlign: 'middle', marginRight: '6px'}} /> Expected Attendees</label>
                     <input 
                         type="number" 
@@ -130,21 +141,26 @@ const BookingForm = ({ onSuccess, preselectedResourceId }) => {
                     />
                 </div>
 
-                <div className="form-group">
+                <div className="form-group" style={{marginBottom: '0.8rem'}}>
                     <label><FileText size={16} style={{verticalAlign: 'middle', marginRight: '6px'}} /> Purpose of Booking</label>
                     <textarea 
                         name="purpose" 
                         value={formData.purpose} 
                         onChange={handleChange} 
-                        rows="4" 
+                        rows="3" 
                         required 
                         placeholder="Please describe the intended use of the facility..."
                     ></textarea>
                 </div>
 
-                <div className="form-actions" style={{justifyContent: 'flex-end'}}>
+                <div className="form-actions" style={{justifyContent: 'flex-end', gap: '1rem'}}>
+                    {initialData && (
+                        <button type="button" className="btn-secondary" onClick={onCancel} style={{width: 'auto', minWidth: '120px'}}>
+                            Cancel
+                        </button>
+                    )}
                     <button type="submit" className="btn-primary" disabled={loading} style={{width: 'auto', minWidth: '200px'}}>
-                        {loading ? 'Processing...' : <><Send size={18} /> Confirm Reservation</>}
+                        {loading ? 'Processing...' : (initialData ? <><Send size={18} /> Update Request</> : <><Send size={18} /> Confirm Reservation</>)}
                     </button>
                 </div>
             </form>

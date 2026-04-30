@@ -60,8 +60,15 @@ public class Ticket {
     @JoinColumn(name = "assigned_to_id")
     private User assignedTo;
 
+    @Column(name = "estimated_time")
+    private Integer estimatedTime;
+
     @Size(max = 100, message = "Preferred contact must not exceed 100 characters")
     private String preferredContact;
+
+    @Size(max = 2000, message = "Resolution notes must not exceed 2000 characters")
+    @Column(name = "resolution_notes", columnDefinition = "TEXT")
+    private String resolutionNotes;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TicketAttachment> attachments = new ArrayList<>();
@@ -116,8 +123,14 @@ public class Ticket {
     public User getAssignedTo() { return assignedTo; }
     public void setAssignedTo(User assignedTo) { this.assignedTo = assignedTo; }
 
+    public Integer getEstimatedTime() { return estimatedTime; }
+    public void setEstimatedTime(Integer estimatedTime) { this.estimatedTime = estimatedTime; }
+
     public String getPreferredContact() { return preferredContact; }
     public void setPreferredContact(String preferredContact) { this.preferredContact = preferredContact; }
+
+    public String getResolutionNotes() { return resolutionNotes; }
+    public void setResolutionNotes(String resolutionNotes) { this.resolutionNotes = resolutionNotes; }
 
     public List<TicketAttachment> getAttachments() { return attachments; }
     public void setAttachments(List<TicketAttachment> attachments) { this.attachments = attachments; }

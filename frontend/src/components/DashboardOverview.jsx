@@ -21,14 +21,16 @@ import { bookingService, getResources } from '../services/api';
 import AdminUsers from './AdminUsers';
 import './DashboardOverview.css';
 
-const DashboardOverview = ({ setView, isAdmin }) => {
+const DashboardOverview = ({ setView, isAdmin, setInitialTicketFilters }) => {
     const currentUser = authService.getCurrentUser();
     const roles = currentUser?.roles || [];
     const isStaff = roles.includes('ROLE_STAFF');
     const isStudent = roles.includes('ROLE_STUDENT');
-    const roleLabel = isAdmin ? 'Administrator' : (isStaff ? 'Staff' : 'Student');
-    const portalLabel = isAdmin ? 'Admin Panel' : (isStaff ? 'Staff Portal' : 'Student Portal');
-    const dashboardTitle = isAdmin ? 'Admin Dashboard' : (isStaff ? 'Staff Dashboard' : 'Student Dashboard');
+    const isTechnician = roles.includes('ROLE_TECHNICIAN');
+    
+    const roleLabel = isAdmin ? 'Administrator' : (isTechnician ? 'Technician' : (isStaff ? 'Staff' : 'Student'));
+    const portalLabel = isAdmin ? 'Admin Panel' : (isTechnician ? 'Technician Portal' : (isStaff ? 'Staff Portal' : 'Student Portal'));
+    const dashboardTitle = isAdmin ? 'Admin Dashboard' : (isTechnician ? 'Technician Dashboard' : (isStaff ? 'Staff Dashboard' : 'Student Dashboard'));
 
     const [activeSideNav, setActiveSideNav] = useState('dashboard');
     const [bookingStats, setBookingStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
@@ -87,13 +89,20 @@ const DashboardOverview = ({ setView, isAdmin }) => {
             { key: 'list', label: 'Bookings', icon: Calendar },
             { key: 'tickets', label: 'Tickets', icon: Ticket },
         ]
-        : [
-            { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-            { key: 'list', label: 'My Bookings', icon: Calendar },
-            { key: 'tickets', label: 'My Tickets', icon: Ticket },
-            { key: 'resources-list', label: 'Resources', icon: Building2 },
-            { key: 'profile', label: 'Settings', icon: Settings },
-        ];
+        : (isTechnician
+            ? [
+                { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                { key: 'tickets', label: 'Assigned Tickets', icon: Ticket },
+                { key: 'resources-list', label: 'Resources', icon: Building2 },
+                { key: 'profile', label: 'Settings', icon: Settings },
+            ]
+            : [
+                { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                { key: 'list', label: 'My Bookings', icon: Calendar },
+                { key: 'tickets', label: 'My Tickets', icon: Ticket },
+                { key: 'resources-list', label: 'Resources', icon: Building2 },
+                { key: 'profile', label: 'Settings', icon: Settings },
+            ]);
 
     const statCards = isAdmin
         ? [
@@ -102,12 +111,19 @@ const DashboardOverview = ({ setView, isAdmin }) => {
             { label: 'Open Tickets', value: 0, icon: Ticket, color: '#f59e0b', trend: '-3%', up: false },
             { label: 'Pending Reviews', value: bookingStats.pending, icon: ShieldCheck, color: '#8b5cf6', trend: '+8%', up: true },
         ]
-        : [
-            { label: 'Available Resources', value: resourceCount, icon: Building2, color: '#0891b2', trend: '+12%', up: true },
-            { label: 'My Bookings', value: bookingStats.total, icon: Calendar, color: '#10b981', trend: '+5%', up: true },
-            { label: 'Open Tickets', value: 0, icon: Ticket, color: '#ea580c', trend: '-3%', up: false },
-            { label: 'Notifications', value: 3, icon: Bell, color: '#8b5cf6', trend: '+8%', up: true },
-        ];
+        : (isTechnician
+            ? [
+                { label: 'Assigned Tickets', value: 0, icon: Ticket, color: '#4f46e5', trend: '+2', up: true },
+                { label: 'Pending Issues', value: 0, icon: Activity, color: '#f59e0b', trend: '-1', up: false },
+                { label: 'Resolved Today', value: 0, icon: CheckCircle2, color: '#10b981', trend: '+4', up: true },
+                { label: 'Notifications', value: 5, icon: Bell, color: '#8b5cf6', trend: '+2', up: true },
+            ]
+            : [
+                { label: 'Available Resources', value: resourceCount, icon: Building2, color: '#0891b2', trend: '+12%', up: true },
+                { label: 'My Bookings', value: bookingStats.total, icon: Calendar, color: '#10b981', trend: '+5%', up: true },
+                { label: 'Open Tickets', value: 0, icon: Ticket, color: '#ea580c', trend: '-3%', up: false },
+                { label: 'Notifications', value: 3, icon: Bell, color: '#8b5cf6', trend: '+8%', up: true },
+            ]);
 
     const actionTiles = isAdmin
         ? [
@@ -116,11 +132,17 @@ const DashboardOverview = ({ setView, isAdmin }) => {
             { label: 'Handle Tickets', sub: 'Resolve support tickets', icon: Ticket, color: 'linear-gradient(135deg,#dc2626,#f97316)', badge: 0, view: 'tickets' },
             { label: 'Resources', sub: 'Manage campus resources', icon: Building2, color: 'linear-gradient(135deg,#0891b2,#06b6d4)', badge: resourceCount, view: 'resources-list' },
         ]
-        : [
-            { label: 'New Booking', sub: 'Reserve a study room or equipment', icon: Calendar, color: 'linear-gradient(135deg,#7c3aed,#a855f7)', badge: null, view: 'resources-list' },
-            { label: 'Report Incident', sub: 'Report a facility or technical issue', icon: Bell, color: 'linear-gradient(135deg,#f97316,#ea580c)', badge: null, view: 'tickets' },
-            { label: 'Browse Resources', sub: 'Explore available campus facilities', icon: Building2, color: 'linear-gradient(135deg,#0891b2,#06b6d4)', badge: null, view: 'resources-list' },
-        ];
+        : (isTechnician
+            ? [
+                { label: 'Assigned Work', sub: 'View and manage assigned tickets', icon: Ticket, color: 'linear-gradient(135deg,#4f46e5,#7c3aed)', badge: null, view: 'tickets' },
+                { label: 'Update Status', sub: 'Change ticket workflow progress', icon: Activity, color: 'linear-gradient(135deg,#f59e0b,#ea580c)', badge: null, view: 'tickets' },
+                { label: 'Resources', sub: 'Check facility information', icon: Building2, color: 'linear-gradient(135deg,#0891b2,#06b6d4)', badge: null, view: 'resources-list' },
+            ]
+            : [
+                { label: 'New Booking', sub: 'Reserve a study room or equipment', icon: Calendar, color: 'linear-gradient(135deg,#7c3aed,#a855f7)', badge: null, view: 'resources-list' },
+                { label: 'Report Incident', sub: 'Report a facility or technical issue', icon: Bell, color: 'linear-gradient(135deg,#f97316,#ea580c)', badge: null, view: 'tickets' },
+                { label: 'Browse Resources', sub: 'Explore available campus facilities', icon: Building2, color: 'linear-gradient(135deg,#0891b2,#06b6d4)', badge: null, view: 'resources-list' },
+            ]);
 
     const statusBadge = (status) => {
         const map = {
@@ -154,7 +176,14 @@ const DashboardOverview = ({ setView, isAdmin }) => {
                             onClick={() => {
                                 setActiveSideNav(item.key);
                                 // Users is handled internally; others bubble up to parent
-                                if (item.key !== 'dashboard' && item.key !== 'users') setView(item.key);
+                                if (item.key !== 'dashboard' && item.key !== 'users') {
+                                    if (item.key === 'tickets' && isTechnician) {
+                                        setInitialTicketFilters({ assignedToId: currentUser.id });
+                                    } else {
+                                        setInitialTicketFilters({});
+                                    }
+                                    setView(item.key);
+                                }
                             }}
                         >
                             <item.icon size={18} />
@@ -264,6 +293,11 @@ const DashboardOverview = ({ setView, isAdmin }) => {
                                     if (tile.view === 'users') {
                                         setActiveSideNav('users');
                                     } else {
+                                        if (tile.view === 'tickets' && isTechnician) {
+                                            setInitialTicketFilters({ assignedToId: currentUser.id });
+                                        } else {
+                                            setInitialTicketFilters({});
+                                        }
                                         setView(tile.view);
                                     }
                                 }}

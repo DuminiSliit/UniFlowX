@@ -1,0 +1,114 @@
+.tickets-page-container {
+    padding: 2rem 5%;
+    background: linear-gradient(135deg, #7047eb, #5a32d1);
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+}
+
+.tp-premium-header {
+    max-width: 1400px;
+    margin: 0 auto 2rem;
+}
+
+.tp-header-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 2rem 3rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.tp-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 1.5rem;
+}
+
+.tp-back-btn:hover {
+    background: #f3f4f6;
+}
+
+.tp-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #6366f1;
+    margin: 0;
+}
+
+.tp-subtitle {
+    color: #6b7280;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+}
+
+.tp-content-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 450px;
+    gap: 2rem;
+    align-items: start;
+}
+
+.tp-content-grid.technician-view {
+    grid-template-columns: 1fr;
+}
+
+.tp-form-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+.tp-sidebar-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 2.5rem;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.tp-sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tp-sidebar-icon-box {
+    background: #eef2ff;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    color: #6366f1;
+}
+
+.tp-sidebar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.tp-sidebar-subtitle {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+@media (max-width: 1200px) {
+    .tp-content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tp-form-sidebar {
+        position: static;
+    }
+}

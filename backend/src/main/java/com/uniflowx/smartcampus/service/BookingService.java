@@ -104,4 +104,52 @@ public class BookingService {
             throw new RuntimeException("Booking cannot be cancelled in its current state.");
         }
     }
+
+    @Transactional
+    public Booking updateBooking(Long id, Booking update, String userId) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found."));
+
+        if (!booking.getUserId().equals(userId)) {
+            throw new RuntimeException("You are not authorized to update this booking.");
+        }
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Only pending bookings can be updated.");
+        }
+
+        // Check for conflicts if time or resource changed
+        Long rId = update.getResourceId() != null ? update.getResourceId() : booking.getResource().getId();
+        
+        List<Booking> overlapping = bookingRepository.findOverlappingBookings(
+                rId,
+                update.getStartTime() != null ? update.getStartTime() : booking.getStartTime(),
+                update.getEndTime() != null ? update.getEndTime() : booking.getEndTime()
+        );
+
+        // Filter out current booking
+        overlapping = overlapping.stream()
+                .filter(b -> !b.getId().equals(id))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (!overlapping.isEmpty()) {
+            throw new RuntimeException("Scheduling conflict: The resource is already booked for the requested time range.");
+        }
+
+        // Update fields
+        if (update.getStartTime() != null) booking.setStartTime(update.getStartTime());
+        if (update.getEndTime() != null) booking.setEndTime(update.getEndTime());
+        if (update.getPurpose() != null) booking.setPurpose(update.getPurpose());
+        if (update.getExpectedAttendees() != null && update.getExpectedAttendees() != 0) {
+            booking.setExpectedAttendees(update.getExpectedAttendees());
+        }
+        
+        if (update.getResourceId() != null && !update.getResourceId().equals(booking.getResource().getId())) {
+            com.uniflowx.smartcampus.model.Resource resource = resourceRepository.findById(update.getResourceId())
+                    .orElseThrow(() -> new RuntimeException("Resource not found."));
+            booking.setResource(resource);
+        }
+
+        return bookingRepository.save(booking);
+    }
 }

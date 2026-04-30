@@ -1,0 +1,130 @@
+.au-wrapper {
+    margin-top: 1rem;
+}
+
+.au-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.au-header h2 {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #1e1b4b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.au-file-input {
+    display: none;
+}
+
+.au-btn {
+    background: #eef2ff;
+    color: #4f46e5;
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.au-btn:hover:not(.disabled) {
+    background: #4f46e5;
+    color: white;
+}
+
+.au-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1.25rem;
+}
+
+.au-item {
+    background: #f8fafc;
+    border-radius: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #eef2ff;
+}
+
+.au-preview {
+    position: relative;
+    aspect-ratio: 1;
+    background: white;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.au-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+}
+
+.au-delete {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.au-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.au-name {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #1e1b4b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.au-size {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.au-empty {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    text-align: center;
+    background: #f8fafc;
+    border-radius: 1.5rem;
+    border: 2px dashed #e2e8f0;
+    color: #94a3b8;
+}
+
+.au-empty-icon {
+    margin-bottom: 0.75rem;
+    opacity: 0.5;
+}

@@ -31,14 +31,18 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Page<Ticket> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("SELECT t FROM Ticket t WHERE " +
+           "(:keyword IS NULL OR :keyword = '' OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "(:status IS NULL OR t.status = :status) AND " +
            "(:category IS NULL OR t.category = :category) AND " +
            "(:priority IS NULL OR t.priority = :priority) AND " +
-           "(:assignedTo IS NULL OR t.assignedTo = :assignedTo)")
-    Page<Ticket> findByFilters(@Param("status") TicketStatus status,
+           "(:assignedToId IS NULL OR t.assignedTo.id = :assignedToId) AND " +
+           "(:createdByUserId IS NULL OR t.createdBy.id = :createdByUserId)")
+    Page<Ticket> findByFilters(@Param("keyword") String keyword,
+                              @Param("status") TicketStatus status,
                               @Param("category") TicketCategory category,
                               @Param("priority") TicketPriority priority,
-                              @Param("assignedTo") User assignedTo,
+                              @Param("assignedToId") Long assignedToId,
+                              @Param("createdByUserId") Long createdByUserId,
                               Pageable pageable);
 
     @Query("SELECT COUNT(t) FROM Ticket t WHERE t.status = :status")

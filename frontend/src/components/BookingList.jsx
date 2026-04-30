@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { bookingService, getResources } from '../services/api';
-import { Calendar, Trash2, CheckCircle, XCircle, Info, User, Landmark, Filter, AlertTriangle } from 'lucide-react';
+import { Calendar, Trash2, CheckCircle, XCircle, Info, User, Landmark, Filter, AlertTriangle, Edit2 } from 'lucide-react';
+import BookingForm from './BookingForm';
 
 const BookingList = ({ isAdmin }) => {
     const [bookings, setBookings] = useState([]);
@@ -10,6 +11,7 @@ const BookingList = ({ isAdmin }) => {
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [actionError, setActionError] = useState('');
     const [actionSuccess, setActionSuccess] = useState('');
+    const [editingBooking, setEditingBooking] = useState(null);
 
     const fetchBookings = async () => {
         setLoading(true);
@@ -241,26 +243,74 @@ const BookingList = ({ isAdmin }) => {
                                 )}
 
                                 {!isAdmin && (booking.status === 'PENDING' || booking.status === 'APPROVED') && (
-                                    <button 
-                                        onClick={() => handleCancel(booking.id)}
-                                        style={{ 
-                                            background: 'none', 
-                                            border: 'none', 
-                                            color: 'var(--danger)', 
-                                            cursor: 'pointer',
-                                            padding: '0.5rem',
-                                            transition: 'transform 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                        title="Cancel Booking"
-                                    >
-                                        <Trash2 size={22} />
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                        {booking.status === 'PENDING' && (
+                                            <button 
+                                                onClick={() => setEditingBooking(booking)}
+                                                style={{ 
+                                                    background: 'none', 
+                                                    border: 'none', 
+                                                    color: 'var(--primary)', 
+                                                    cursor: 'pointer',
+                                                    padding: '0.5rem',
+                                                    transition: 'transform 0.2s'
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                title="Edit Booking"
+                                            >
+                                                <Edit2 size={20} />
+                                            </button>
+                                        )}
+                                        <button 
+                                            onClick={() => handleCancel(booking.id)}
+                                            style={{ 
+                                                background: 'none', 
+                                                border: 'none', 
+                                                color: 'var(--danger)', 
+                                                cursor: 'pointer',
+                                                padding: '0.5rem',
+                                                transition: 'transform 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                            title="Cancel Booking"
+                                        >
+                                            <Trash2 size={22} />
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Edit Modal Overlay */}
+            {editingBooking && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    padding: '2rem'
+                }}>
+                    <div style={{ width: '100%', maxWidth: '850px' }}>
+                        <BookingForm 
+                            initialData={editingBooking} 
+                            onSuccess={() => {
+                                setEditingBooking(null);
+                                fetchBookings();
+                            }}
+                            onCancel={() => setEditingBooking(null)}
+                        />
+                    </div>
                 </div>
             )}
         </div>

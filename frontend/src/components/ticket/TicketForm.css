@@ -1,0 +1,248 @@
+.tf-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.tf-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tf-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.tf-input, .tf-textarea, .tf-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    color: #374151;
+    transition: all 0.2s;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.tf-textarea {
+    resize: vertical;
+}
+
+.tf-input:focus, .tf-textarea:focus, .tf-select:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.tf-input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.tf-input-with-icon .tf-icon {
+    position: absolute;
+    left: 1rem;
+    color: #9ca3af;
+    pointer-events: none;
+}
+
+.tf-input-with-icon .tf-input, .tf-input-with-icon .tf-select {
+    padding-left: 2.75rem;
+}
+
+/* Custom Priority Radios */
+.tf-priority-grid {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.tf-priority-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.tf-priority-radio {
+    margin: 0;
+    width: 1rem;
+    height: 1rem;
+    accent-color: #6366f1;
+    cursor: pointer;
+}
+
+.tf-priority-pill {
+    padding: 0.25rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+}
+
+.tf-priority-pill.LOW { background: #3b82f6; }
+.tf-priority-pill.MEDIUM { background: #f59e0b; }
+.tf-priority-pill.HIGH { background: #ef4444; }
+.tf-priority-pill.URGENT { background: #991b1b; }
+
+.tf-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+.tf-cancel-btn {
+    padding: 0.75rem 1.5rem;
+    background: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tf-cancel-btn:hover {
+    background: #f9fafb;
+}
+
+.tf-submit-btn {
+    padding: 0.75rem 1.5rem;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tf-submit-btn:hover:not(:disabled) {
+    background: #4f46e5;
+}
+
+.tf-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.tf-image-upload-zone {
+    background: #ffffff;
+    border: 2px dashed #d1d5db;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.tf-file-input {
+    display: none;
+}
+
+.tf-upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6366f1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+
+.tf-image-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tf-img-preview {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4b5563;
+}
+
+.tf-img-preview button {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+}
+
+.tf-error {
+    padding: 1rem;
+    background: #fef2f2;
+    color: #b91c1c;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #fee2e2;
+}
+
+.tf-success {
+    padding: 1rem;
+    background: #f0fdf4;
+    color: #15803d;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #dcfce7;
+}
+
+.tf-loader {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: tf-spin 0.8s linear infinite;
+}
+
+@keyframes tf-spin {
+    to { transform: rotate(360deg); }
+}
+
+.tf-standalone-container {
+    padding: 4rem 5%;
+    display: flex;
+    justify-content: center;
+}
+
+.tf-standalone-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.tf-standalone-card h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 2rem;
+    text-align: center;
+}
